@@ -38,10 +38,18 @@ struct MenuBarView: View {
 
         Divider()
 
-        if service.nearbyRemotes.isEmpty {
-            Button("Open Bluetooth Settings…", systemImage: "gearshape", action: service.openBluetoothSettings)
-                .labelStyle(.titleAndIcon)
+        Button(action: service.openBluetoothSettings) {
+            Label {
+                Text("Open Bluetooth Settings…")
+            } icon: {
+                Image("BluetoothSettingsIcon")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 16, height: 16)
+            }
         }
+        .labelStyle(.titleAndIcon)
 
         if !service.hasDeviceControlPermission {
             Button(

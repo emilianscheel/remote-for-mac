@@ -23,6 +23,7 @@
 		A0010000000000000000000E /* ApplicationContextService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000013 /* ApplicationContextService.swift */; };
 		A0010000000000000000000F /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000014 /* UpdateService.swift */; };
 		A00100000000000000000010 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000002 /* Sparkle */; };
+		A00100000000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000015 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		A00200000000000000000012 /* Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Icon.icon; sourceTree = "<group>"; };
 		A00200000000000000000013 /* ApplicationContextService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationContextService.swift; sourceTree = "<group>"; };
 		A00200000000000000000014 /* UpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateService.swift; sourceTree = "<group>"; };
+		A00200000000000000000015 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 			children = (
 				A00200000000000000000012 /* Icon.icon */,
 				A04000000000000000000002 /* Sources */,
+				A0400000000000000000000A /* Resources */,
 				A04000000000000000000006 /* Support */,
 				A04000000000000000000007 /* Tests */,
 				A04000000000000000000008 /* Frameworks */,
@@ -98,6 +101,14 @@
 				A04000000000000000000005 /* Services */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		A0400000000000000000000A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000015 /* Assets.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		A04000000000000000000003 /* App */ = {
@@ -256,6 +267,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A0010000000000000000000D /* Icon.icon in Resources */,
+				A00100000000000000000011 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
