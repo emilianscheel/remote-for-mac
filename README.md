@@ -1,1 +1,1 @@
-# remote-for-mac
+# Remote for Mac
