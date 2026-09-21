@@ -5,7 +5,7 @@ struct MenuBarView: View {
 
     var body: some View {
         Button(
-            service.connectionState.isConnected ? "Connected" : "Disconnected",
+            statusText,
             systemImage: service.connectionState.isConnected ? "checkmark" : "xmark"
         ) {}
         .labelStyle(.titleAndIcon)
@@ -57,5 +57,10 @@ struct MenuBarView: View {
         Button("Quit", systemImage: "power", action: service.quit)
             .labelStyle(.titleAndIcon)
             .keyboardShortcut("q")
+    }
+
+    private var statusText: String {
+        let connection = service.connectionState.isConnected ? "Connected" : "Disconnected"
+        return service.hasDeviceControlPermission ? connection : "\(connection) · Permission required"
     }
 }
