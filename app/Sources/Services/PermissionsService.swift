@@ -13,7 +13,11 @@ enum PermissionsService {
     }
 
     static var hasRequiredPermissions: Bool {
-        AXIsProcessTrusted() && IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+        AXIsProcessTrusted() && hasDeviceControlPermission
+    }
+
+    static var hasDeviceControlPermission: Bool {
+        IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
     }
 
     private static func requestAccessibilityIfNeeded() {

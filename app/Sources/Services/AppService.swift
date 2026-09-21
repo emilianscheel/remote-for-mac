@@ -5,6 +5,7 @@ import Combine
 final class AppService: ObservableObject {
     @Published private(set) var connectionState: ConnectionState = .disconnected
     @Published private(set) var nearbyRemotes: [NearbyRemote] = []
+    @Published private(set) var hasDeviceControlPermission = PermissionsService.hasDeviceControlPermission
 
     private let bluetooth: BluetoothServicing
     private let remoteInput: RemoteInputServicing
@@ -28,8 +29,13 @@ final class AppService: ObservableObject {
         guard !hasStarted else { return }
         hasStarted = true
         PermissionsService.requestRequiredPermissions()
+        refreshPermissions()
         remoteInput.start()
         beginScanning()
+    }
+
+    func refreshPermissions() {
+        hasDeviceControlPermission = PermissionsService.hasDeviceControlPermission
     }
 
     func beginScanning() {
@@ -57,6 +63,11 @@ final class AppService: ObservableObject {
 
     func openBluetoothSettings() {
         guard let url = URL(string: "x-apple.systempreferences:com.apple.BluetoothSettings") else { return }
+        NSWorkspace.shared.open(url)
+    }
+
+    func openDeviceControlSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent") else { return }
         NSWorkspace.shared.open(url)
     }
 

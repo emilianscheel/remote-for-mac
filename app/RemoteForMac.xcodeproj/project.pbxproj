@@ -339,6 +339,7 @@
 					MultitouchSupport,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMac;
+				PRODUCT_MODULE_NAME = RemoteForMac;
 				PRODUCT_NAME = "Remote for Mac";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Support/RemoteForMac-Bridging-Header.h";
@@ -373,6 +374,7 @@
 					MultitouchSupport,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMac;
+				PRODUCT_MODULE_NAME = RemoteForMac;
 				PRODUCT_NAME = "Remote for Mac";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Support/RemoteForMac-Bridging-Header.h";

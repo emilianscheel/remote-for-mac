@@ -4,45 +4,55 @@ struct MenuBarView: View {
     @ObservedObject var service: AppService
 
     var body: some View {
-        Label(
+        Button(
             service.connectionState.isConnected ? "Connected" : "Disconnected",
             systemImage: service.connectionState.isConnected ? "checkmark" : "xmark"
-        )
-            .disabled(true)
+        ) {}
+        .labelStyle(.titleAndIcon)
+        .disabled(true)
+        .onAppear(perform: service.refreshPermissions)
 
         Divider()
 
         if service.connectionState.isConnected {
-            Button(action: service.disconnect) {
-                Label("Disconnect", systemImage: "xmark.circle")
-            }
+            Button("Disconnect", systemImage: "xmark.circle", action: service.disconnect)
+                .labelStyle(.titleAndIcon)
         } else {
             Text("Hold Back + Volume Up for 5 seconds.")
                 .disabled(true)
 
-            Button(action: service.openBluetoothSettings) {
-                Label("Open Bluetooth Settings…", systemImage: "gearshape")
-            }
+            Button("Open Bluetooth Settings…", systemImage: "gearshape", action: service.openBluetoothSettings)
+                .labelStyle(.titleAndIcon)
 
             if service.nearbyRemotes.isEmpty {
-                Label("Searching…", systemImage: "dot.radiowaves.left.and.right")
+                Button("Searching…", systemImage: "dot.radiowaves.left.and.right") {}
+                    .labelStyle(.titleAndIcon)
                     .disabled(true)
             } else {
                 ForEach(service.nearbyRemotes) { remote in
-                    Button {
+                    Button(remote.name, systemImage: "appletvremote.gen4") {
                         service.connect(to: remote)
-                    } label: {
-                        Label(remote.name, systemImage: "appletvremote.gen4")
                     }
+                    .labelStyle(.titleAndIcon)
                 }
             }
         }
 
+        if !service.hasDeviceControlPermission {
+            Divider()
+
+            Button(
+                "Open Device Control Settings…",
+                systemImage: "hand.raised",
+                action: service.openDeviceControlSettings
+            )
+            .labelStyle(.titleAndIcon)
+        }
+
         Divider()
 
-        Button(action: service.quit) {
-            Label("Quit", systemImage: "power")
-        }
+        Button("Quit", systemImage: "power", action: service.quit)
+            .labelStyle(.titleAndIcon)
             .keyboardShortcut("q")
     }
 }
