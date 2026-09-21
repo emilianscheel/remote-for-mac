@@ -1,10 +1,17 @@
+import Image from "next/image";
+
 export default function Home() {
   return (
     <main className="flex min-h-svh items-center justify-center px-6 py-16">
       <section aria-labelledby="product-name" className="flex w-full max-w-xs flex-col items-center text-center">
-        <div
+        <Image
           aria-hidden="true"
-          className="mb-7 size-28 rounded-[1.65rem] border border-black/[0.08] bg-white/55 dark:border-white/[0.1] dark:bg-white/[0.07]"
+          alt=""
+          className="mb-7 size-28 rounded-[1.65rem]"
+          height={112}
+          priority
+          src="/Icon.png"
+          width={112}
         />
         <h1 id="product-name" className="text-2xl font-medium tracking-[-0.035em] text-zinc-950 dark:text-zinc-50">
           Remote for Mac

@@ -19,6 +19,7 @@
 		A0010000000000000000000A /* AppService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000A /* AppService.swift */; };
 		A0010000000000000000000B /* RemoteForMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000B /* RemoteForMacTests.swift */; };
 		A0010000000000000000000C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000E /* XCTest.framework */; };
+		A0010000000000000000000D /* Icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000012 /* Icon.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		A0020000000000000000000F /* MultitouchSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MultitouchSupport.h; sourceTree = "<group>"; };
 		A00200000000000000000010 /* RemoteForMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RemoteForMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00200000000000000000011 /* RemoteForMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RemoteForMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00200000000000000000012 /* Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Icon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +75,7 @@
 		A04000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				A00200000000000000000012 /* Icon.icon */,
 				A04000000000000000000002 /* Sources */,
 				A04000000000000000000006 /* Support */,
 				A04000000000000000000007 /* Tests */,
@@ -238,6 +241,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0010000000000000000000D /* Icon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,6 +315,7 @@
 		A08000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -343,6 +348,7 @@
 		A08000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
