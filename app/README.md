@@ -18,10 +18,18 @@ xcrun notarytool store-credentials "RemoteForMac" --apple-id "YOUR_APPLE_ID" --t
 
 Enter an app-specific password when prompted. This is a one-time setup and is separate from the signing certificate.
 
+The Sparkle update signing key is stored in the login Keychain under the account `RemoteForMac`. If it ever needs to be created on a new release machine, resolve the project packages in Xcode and run:
+
+```bash
+~/Library/Caches/RemoteForMac/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys --account RemoteForMac
+```
+
 Then create the signed and notarized disk image:
 
 ```bash
 ./release.sh
 ```
 
-The script uses manual distribution signing and asks Keychain to select the team's installed Developer ID Application certificate. It archives a Release build with Hardened Runtime, creates and notarizes the disk image, staples the notarization ticket, verifies the result, and writes `Remote for Mac.dmg` to the project root. Set `NOTARY_PROFILE`, `TEAM_ID`, or `SIGNING_IDENTITY` in the environment when using different signing credentials.
+The script uses manual distribution signing and asks Keychain to select the team's installed Developer ID Application certificate. It archives a Release build with Hardened Runtime, creates and notarizes the disk image, staples the notarization ticket, verifies the result, signs the update with Sparkle, and writes `Remote for Mac.dmg` to the project root. It also regenerates `web/public/appcast.xml` with a download URL for the GitHub release tag matching the app version. Upload the DMG to that release and commit the generated appcast with the version change.
+
+Set `NOTARY_PROFILE`, `TEAM_ID`, `SIGNING_IDENTITY`, `SPARKLE_ACCOUNT`, or `SPM_CACHE_DIR` in the environment when using different release credentials or cache locations.

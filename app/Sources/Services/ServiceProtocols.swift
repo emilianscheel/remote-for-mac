@@ -25,3 +25,17 @@ protocol MacActionDispatching {
 protocol ApplicationContextProviding {
     func currentContext() -> ApplicationContext
 }
+
+@MainActor
+protocol PermissionServicing: AnyObject {
+    var current: PermissionState { get }
+    var onChange: ((PermissionState) -> Void)? { get set }
+    func requestRequiredPermissions()
+    func startMonitoring()
+    func stopMonitoring()
+}
+
+@MainActor
+protocol UpdateServicing {
+    func start()
+}

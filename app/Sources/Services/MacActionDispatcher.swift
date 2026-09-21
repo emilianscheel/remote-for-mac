@@ -13,7 +13,8 @@ struct MacActionDispatcher: MacActionDispatching {
         case .escape:
             postKey(CGKeyCode(kVK_Escape))
         case .keyboardShortcut(let shortcut):
-            postKey(keyCode(for: shortcut.key), flags: flags(for: shortcut.modifiers))
+            let event = KeyboardShortcutResolver.event(for: shortcut)
+            postKey(event.keyCode, flags: event.flags)
         case .media(let key):
             postMediaKey(mediaKeyCode(for: key))
         case .missionControl:
@@ -34,21 +35,6 @@ struct MacActionDispatcher: MacActionDispatching {
         case .right: code = kVK_RightArrow
         }
         return CGKeyCode(code)
-    }
-
-    private func keyCode(for key: KeyboardKey) -> CGKeyCode {
-        switch key {
-        case .p: CGKeyCode(kVK_ANSI_P)
-        }
-    }
-
-    private func flags(for modifiers: Set<KeyboardModifier>) -> CGEventFlags {
-        modifiers.reduce(into: CGEventFlags()) { flags, modifier in
-            switch modifier {
-            case .command: flags.insert(.maskCommand)
-            case .option: flags.insert(.maskAlternate)
-            }
-        }
     }
 
     private func mediaKeyCode(for key: MediaKey) -> Int32 {
@@ -97,5 +83,35 @@ struct MacActionDispatcher: MacActionDispatching {
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = true
         NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path), configuration: configuration)
+    }
+}
+
+struct KeyboardEventDescriptor: Equatable {
+    let keyCode: CGKeyCode
+    let flags: CGEventFlags
+}
+
+enum KeyboardShortcutResolver {
+    static func event(for shortcut: KeyboardShortcut) -> KeyboardEventDescriptor {
+        KeyboardEventDescriptor(
+            keyCode: keyCode(for: shortcut.key),
+            flags: flags(for: shortcut.modifiers)
+        )
+    }
+
+    private static func keyCode(for key: KeyboardKey) -> CGKeyCode {
+        switch key {
+        case .p: CGKeyCode(kVK_ANSI_P)
+        case .return: CGKeyCode(kVK_Return)
+        }
+    }
+
+    private static func flags(for modifiers: Set<KeyboardModifier>) -> CGEventFlags {
+        modifiers.reduce(into: CGEventFlags()) { flags, modifier in
+            switch modifier {
+            case .command: flags.insert(.maskCommand)
+            case .option: flags.insert(.maskAlternate)
+            }
+        }
     }
 }

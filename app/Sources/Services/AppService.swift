@@ -5,8 +5,8 @@ import Combine
 final class AppService: ObservableObject {
     @Published private(set) var connectionState: ConnectionState = .disconnected
     @Published private(set) var nearbyRemotes: [NearbyRemote] = []
-    @Published private(set) var hasDeviceControlPermission = PermissionsService.hasDeviceControlPermission
-    @Published private(set) var hasRequiredPermissions = PermissionsService.hasRequiredPermissions
+    @Published private(set) var hasDeviceControlPermission = false
+    @Published private(set) var hasRequiredPermissions = false
 
     var isReady: Bool {
         connectionState.isConnected && hasRequiredPermissions
@@ -16,6 +16,8 @@ final class AppService: ObservableObject {
     private let remoteInput: RemoteInputServicing
     private let actionDispatcher: MacActionDispatching
     private let applicationContext: ApplicationContextProviding
+    private let permissions: PermissionServicing
+    private let updater: UpdateServicing
     private var selectedRemote: NearbyRemote?
     private var userDisconnected = false
     private var hasStarted = false
@@ -24,27 +26,33 @@ final class AppService: ObservableObject {
         bluetooth: BluetoothServicing = BluetoothService(),
         remoteInput: RemoteInputServicing = RemoteInputService(),
         actionDispatcher: MacActionDispatching = MacActionDispatcher(),
-        applicationContext: ApplicationContextProviding = ApplicationContextService()
+        applicationContext: ApplicationContextProviding = ApplicationContextService(),
+        permissions: PermissionServicing = PermissionsService(),
+        updater: UpdateServicing = UpdateService()
     ) {
         self.bluetooth = bluetooth
         self.remoteInput = remoteInput
         self.actionDispatcher = actionDispatcher
         self.applicationContext = applicationContext
+        self.permissions = permissions
+        self.updater = updater
+        apply(permissions.current)
         bindServices()
     }
 
     func start() {
         guard !hasStarted else { return }
         hasStarted = true
-        PermissionsService.requestRequiredPermissions()
+        updater.start()
+        permissions.requestRequiredPermissions()
         refreshPermissions()
+        permissions.startMonitoring()
         remoteInput.start()
         beginScanning()
     }
 
     func refreshPermissions() {
-        hasDeviceControlPermission = PermissionsService.hasDeviceControlPermission
-        hasRequiredPermissions = PermissionsService.hasRequiredPermissions
+        apply(permissions.current)
     }
 
     func beginScanning() {
@@ -81,12 +89,16 @@ final class AppService: ObservableObject {
     }
 
     func quit() {
+        permissions.stopMonitoring()
         remoteInput.stop()
         bluetooth.stopScanning()
         NSApplication.shared.terminate(nil)
     }
 
     private func bindServices() {
+        permissions.onChange = { [weak self] state in
+            self?.apply(state)
+        }
         bluetooth.onRemotesChanged = { [weak self] remotes in
             guard let self else { return }
             nearbyRemotes = remotes
@@ -122,5 +134,10 @@ final class AppService: ObservableObject {
             let action = RemoteActionMap.action(for: input, in: applicationContext.currentContext())
             actionDispatcher.dispatch(action)
         }
+    }
+
+    private func apply(_ permissions: PermissionState) {
+        hasDeviceControlPermission = permissions.hasDeviceControl
+        hasRequiredPermissions = permissions.hasRequiredPermissions
     }
 }

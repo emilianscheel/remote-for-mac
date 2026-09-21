@@ -54,6 +54,9 @@ struct MenuBarView: View {
 
         Divider()
 
+        Button(AppVersion.current) {}
+            .disabled(true)
+
         Button("Quit", systemImage: "power", action: service.quit)
             .labelStyle(.titleAndIcon)
             .keyboardShortcut("q")

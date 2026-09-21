@@ -52,13 +52,15 @@ enum MediaKey: Equatable {
     case playPause, mute, volumeUp, volumeDown, fastForward, rewind
 }
 
-enum ApplicationContext: Equatable {
+enum ApplicationContext: Hashable {
     case standard
     case keynote
+    case powerPoint
 }
 
 enum KeyboardKey: Equatable {
     case p
+    case `return`
 }
 
 enum KeyboardModifier: Hashable {
@@ -83,15 +85,23 @@ enum MacAction: Equatable {
 }
 
 enum RemoteActionMap {
-    private static let keynoteOverrides: [RemoteInput: MacAction] = [
-        .playPause: .keyboardShortcut(
-            KeyboardShortcut(key: .p, modifiers: [.command, .option])
-        ),
-        .back: .escape,
+    private static let presentationOverrides: [ApplicationContext: [RemoteInput: MacAction]] = [
+        .keynote: [
+            .playPause: .keyboardShortcut(
+                KeyboardShortcut(key: .p, modifiers: [.command, .option])
+            ),
+            .back: .escape,
+        ],
+        .powerPoint: [
+            .playPause: .keyboardShortcut(
+                KeyboardShortcut(key: .return, modifiers: [.command])
+            ),
+            .back: .escape,
+        ],
     ]
 
     static func action(for input: RemoteInput, in context: ApplicationContext = .standard) -> MacAction {
-        if context == .keynote, let action = keynoteOverrides[input] {
+        if let action = presentationOverrides[context]?[input] {
             return action
         }
 

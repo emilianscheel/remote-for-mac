@@ -7,14 +7,21 @@ readonly SCHEME_NAME="RemoteForMac"
 readonly TEAM_ID="${TEAM_ID:-9GALM9GLFA}"
 readonly NOTARY_PROFILE="${NOTARY_PROFILE:-RemoteForMac}"
 readonly SIGNING_IDENTITY="${SIGNING_IDENTITY:-Developer ID Application}"
+readonly SPARKLE_ACCOUNT="${SPARKLE_ACCOUNT:-RemoteForMac}"
 readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 readonly PROJECT="$SCRIPT_DIR/RemoteForMac.xcodeproj"
 readonly OUTPUT_DMG="$PROJECT_ROOT/$APP_NAME.dmg"
+readonly OUTPUT_APPCAST="$PROJECT_ROOT/web/public/appcast.xml"
+readonly SPM_CACHE_DIR="${SPM_CACHE_DIR:-$HOME/Library/Caches/RemoteForMac/SourcePackages}"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/RemoteForMac-release.XXXXXX")"
 readonly ARCHIVE="$WORK_DIR/RemoteForMac.xcarchive"
+readonly EXPORT_DIR="$WORK_DIR/export"
+readonly EXPORT_OPTIONS="$WORK_DIR/ExportOptions.plist"
 readonly STAGING="$WORK_DIR/dmg"
+readonly APPCAST_STAGING="$WORK_DIR/appcast"
 readonly UNSIGNED_DMG="$WORK_DIR/$APP_NAME.dmg"
+readonly NOTARY_RESULT="$WORK_DIR/notarization.json"
 
 cleanup() {
   rm -rf "$WORK_DIR"
@@ -38,6 +45,32 @@ EOF
   exit 1
 fi
 
+echo "Resolving release dependencies..."
+mkdir -p "$SPM_CACHE_DIR"
+xcodebuild -resolvePackageDependencies \
+  -project "$PROJECT" \
+  -scheme "$SCHEME_NAME" \
+  -clonedSourcePackagesDirPath "$SPM_CACHE_DIR"
+
+readonly SPARKLE_BIN="$SPM_CACHE_DIR/artifacts/sparkle/Sparkle/bin"
+readonly GENERATE_KEYS="$SPARKLE_BIN/generate_keys"
+readonly GENERATE_APPCAST="$SPARKLE_BIN/generate_appcast"
+
+if [[ ! -x "$GENERATE_KEYS" || ! -x "$GENERATE_APPCAST" ]]; then
+  echo "Sparkle release tools were not found in $SPARKLE_BIN." >&2
+  exit 1
+fi
+
+if ! SPARKLE_PUBLIC_KEY="$($GENERATE_KEYS --account "$SPARKLE_ACCOUNT" -p 2>/dev/null)"; then
+  cat >&2 <<EOF
+No Sparkle signing key named '$SPARKLE_ACCOUNT' was found.
+Create it once with:
+  "$GENERATE_KEYS" --account "$SPARKLE_ACCOUNT"
+EOF
+  exit 1
+fi
+readonly SPARKLE_PUBLIC_KEY
+
 echo "Archiving $APP_NAME with Hardened Runtime..."
 xcodebuild archive \
   -project "$PROJECT" \
@@ -45,15 +78,49 @@ xcodebuild archive \
   -configuration Release \
   -destination "generic/platform=macOS" \
   -archivePath "$ARCHIVE" \
+  -clonedSourcePackagesDirPath "$SPM_CACHE_DIR" \
   DEVELOPMENT_TEAM="$TEAM_ID" \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
   ENABLE_HARDENED_RUNTIME=YES
 
-readonly APP="$ARCHIVE/Products/Applications/$APP_NAME.app"
+cat > "$EXPORT_OPTIONS" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>method</key>
+  <string>developer-id</string>
+  <key>signingStyle</key>
+  <string>manual</string>
+  <key>signingCertificate</key>
+  <string>$SIGNING_IDENTITY</string>
+  <key>teamID</key>
+  <string>$TEAM_ID</string>
+</dict>
+</plist>
+EOF
+
+echo "Exporting Developer ID application..."
+xcodebuild -exportArchive \
+  -archivePath "$ARCHIVE" \
+  -exportPath "$EXPORT_DIR" \
+  -exportOptionsPlist "$EXPORT_OPTIONS"
+
+readonly APP="$EXPORT_DIR/$APP_NAME.app"
 
 if [[ ! -d "$APP" ]]; then
   echo "Archive did not contain $APP_NAME.app." >&2
+  exit 1
+fi
+
+readonly APP_INFO="$APP/Contents/Info.plist"
+readonly RELEASE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_INFO")"
+readonly BUILD_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_INFO")"
+readonly EMBEDDED_SPARKLE_PUBLIC_KEY="$(/usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' "$APP_INFO")"
+
+if [[ "$EMBEDDED_SPARKLE_PUBLIC_KEY" != "$SPARKLE_PUBLIC_KEY" ]]; then
+  echo "The archived app's SUPublicEDKey does not match Keychain account '$SPARKLE_ACCOUNT'." >&2
   exit 1
 fi
 
@@ -84,7 +151,14 @@ codesign --force --timestamp --sign "$APP_SIGNING_IDENTITY" "$UNSIGNED_DMG"
 echo "Submitting disk image for notarization..."
 xcrun notarytool submit "$UNSIGNED_DMG" \
   --keychain-profile "$NOTARY_PROFILE" \
-  --wait
+  --wait \
+  --output-format json > "$NOTARY_RESULT"
+cat "$NOTARY_RESULT"
+
+if [[ "$(plutil -extract status raw -o - "$NOTARY_RESULT")" != "Accepted" ]]; then
+  echo "Apple rejected the notarization submission." >&2
+  exit 1
+fi
 
 echo "Stapling and validating notarization ticket..."
 xcrun stapler staple "$UNSIGNED_DMG"
@@ -93,6 +167,29 @@ codesign --verify --verbose=2 "$UNSIGNED_DMG"
 spctl --assess --type open --context context:primary-signature --verbose=2 "$UNSIGNED_DMG"
 
 rm -f "$OUTPUT_DMG"
-mv "$UNSIGNED_DMG" "$OUTPUT_DMG"
+cp "$UNSIGNED_DMG" "$OUTPUT_DMG"
+codesign --verify --verbose=2 "$OUTPUT_DMG"
+xcrun stapler validate "$OUTPUT_DMG"
+
+echo "Generating signed Sparkle appcast for version $RELEASE_VERSION ($BUILD_VERSION)..."
+mkdir -p "$APPCAST_STAGING"
+cp "$OUTPUT_DMG" "$APPCAST_STAGING/Remote.for.Mac.dmg"
+"$GENERATE_APPCAST" \
+  --account "$SPARKLE_ACCOUNT" \
+  --download-url-prefix "https://github.com/emilianscheel/remote-for-mac/releases/download/$RELEASE_VERSION/" \
+  --maximum-versions 1 \
+  --maximum-deltas 0 \
+  -o "$APPCAST_STAGING/appcast.xml" \
+  "$APPCAST_STAGING"
+
+mkdir -p "$(dirname "$OUTPUT_APPCAST")"
+cp "$APPCAST_STAGING/appcast.xml" "$OUTPUT_APPCAST.tmp"
+mv "$OUTPUT_APPCAST.tmp" "$OUTPUT_APPCAST"
+
+codesign --verify --verbose=2 "$OUTPUT_DMG"
+xcrun stapler validate "$OUTPUT_DMG"
+spctl --assess --type open --context context:primary-signature --verbose=2 "$OUTPUT_DMG"
 
 echo "Created notarized release: $OUTPUT_DMG"
+echo "Updated signed appcast: $OUTPUT_APPCAST"
+echo "Upload the DMG to the GitHub release tagged '$RELEASE_VERSION'."

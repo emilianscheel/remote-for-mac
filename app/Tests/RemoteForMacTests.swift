@@ -1,4 +1,6 @@
 import XCTest
+import Carbon.HIToolbox
+import CoreGraphics
 @testable import RemoteForMac
 
 final class RemoteForMacTests: XCTestCase {
@@ -40,6 +42,40 @@ final class RemoteForMacTests: XCTestCase {
         )
         XCTAssertEqual(RemoteActionMap.action(for: .back, in: .keynote), .escape)
         XCTAssertEqual(RemoteActionMap.action(for: .playPause, in: .standard), .media(.playPause))
+    }
+
+    func testPresentationApplicationDetection() {
+        XCTAssertEqual(ApplicationContextService.context(for: "com.apple.Keynote"), .keynote)
+        XCTAssertEqual(ApplicationContextService.context(for: "com.apple.iWork.Keynote"), .keynote)
+        XCTAssertEqual(ApplicationContextService.context(for: "com.microsoft.Powerpoint"), .powerPoint)
+        XCTAssertEqual(ApplicationContextService.context(for: "com.apple.TextEdit"), .standard)
+        XCTAssertEqual(ApplicationContextService.context(for: nil), .standard)
+    }
+
+    func testPowerPointOverridesAreDeclarativeAndContextual() {
+        let playShortcut = KeyboardShortcut(key: .return, modifiers: [.command])
+
+        XCTAssertEqual(
+            RemoteActionMap.action(for: .playPause, in: .powerPoint),
+            .keyboardShortcut(playShortcut)
+        )
+        XCTAssertEqual(RemoteActionMap.action(for: .back, in: .powerPoint), .escape)
+        XCTAssertEqual(RemoteActionMap.action(for: .direction(.right), in: .powerPoint), .arrow(.right))
+    }
+
+    func testPresentationShortcutKeyCodesAndModifiers() {
+        let keynote = KeyboardShortcutResolver.event(
+            for: KeyboardShortcut(key: .p, modifiers: [.command, .option])
+        )
+        XCTAssertEqual(keynote.keyCode, CGKeyCode(kVK_ANSI_P))
+        XCTAssertEqual(keynote.flags, [.maskCommand, .maskAlternate])
+        XCTAssertFalse(keynote.flags.contains(.maskShift))
+
+        let powerPoint = KeyboardShortcutResolver.event(
+            for: KeyboardShortcut(key: .return, modifiers: [.command])
+        )
+        XCTAssertEqual(powerPoint.keyCode, CGKeyCode(kVK_Return))
+        XCTAssertEqual(powerPoint.flags, [.maskCommand])
     }
 
     func testHIDUsages() {
@@ -124,6 +160,51 @@ final class RemoteForMacTests: XCTestCase {
         )
         _ = service
     }
+
+    @MainActor
+    func testAppServiceTracksPermissionRevocationAndStartsServicesOnce() {
+        let permissions = PermissionMock(
+            current: PermissionState(hasAccessibility: true, hasDeviceControl: true)
+        )
+        let updater = UpdateMock()
+        let service = AppService(
+            bluetooth: BluetoothMock(),
+            remoteInput: RemoteInputMock(),
+            actionDispatcher: ActionDispatcherMock(),
+            permissions: permissions,
+            updater: updater
+        )
+
+        XCTAssertTrue(service.hasDeviceControlPermission)
+        XCTAssertTrue(service.hasRequiredPermissions)
+
+        service.start()
+        service.start()
+        XCTAssertEqual(permissions.requestCount, 1)
+        XCTAssertEqual(permissions.startMonitoringCount, 1)
+        XCTAssertEqual(updater.startCount, 1)
+
+        permissions.send(PermissionState(hasAccessibility: true, hasDeviceControl: false))
+        XCTAssertFalse(service.hasDeviceControlPermission)
+        XCTAssertFalse(service.hasRequiredPermissions)
+
+        permissions.send(PermissionState(hasAccessibility: true, hasDeviceControl: true))
+        XCTAssertTrue(service.hasDeviceControlPermission)
+        XCTAssertTrue(service.hasRequiredPermissions)
+    }
+
+    @MainActor
+    func testReleaseVersionIsExposedToTheMenu() {
+        XCTAssertEqual(AppVersion.current, "1.2")
+        XCTAssertEqual(
+            Bundle.main.object(forInfoDictionaryKey: "SUScheduledCheckInterval") as? Double,
+            86_400
+        )
+        XCTAssertEqual(
+            Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String,
+            "https://remote-for-mac.vercel.app/appcast.xml"
+        )
+    }
 }
 
 private final class BluetoothMock: BluetoothServicing {
@@ -162,4 +243,31 @@ private final class ActionDispatcherMock: MacActionDispatching {
 private struct ApplicationContextMock: ApplicationContextProviding {
     let context: ApplicationContext
     func currentContext() -> ApplicationContext { context }
+}
+
+@MainActor
+private final class PermissionMock: PermissionServicing {
+    var current: PermissionState
+    var onChange: ((PermissionState) -> Void)?
+    var requestCount = 0
+    var startMonitoringCount = 0
+
+    init(current: PermissionState) {
+        self.current = current
+    }
+
+    func requestRequiredPermissions() { requestCount += 1 }
+    func startMonitoring() { startMonitoringCount += 1 }
+    func stopMonitoring() {}
+
+    func send(_ state: PermissionState) {
+        current = state
+        onChange?(state)
+    }
+}
+
+@MainActor
+private final class UpdateMock: UpdateServicing {
+    var startCount = 0
+    func start() { startCount += 1 }
 }

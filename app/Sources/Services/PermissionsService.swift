@@ -1,10 +1,32 @@
 import ApplicationServices
 import IOKit.hid
 
-enum PermissionsService {
+struct PermissionState: Equatable {
+    let hasAccessibility: Bool
+    let hasDeviceControl: Bool
+
+    var hasRequiredPermissions: Bool {
+        hasAccessibility && hasDeviceControl
+    }
+}
+
+@MainActor
+final class PermissionsService: PermissionServicing {
     private static let accessibilityRequestKey = "didRequestAccessibilityAccess"
 
-    static func requestRequiredPermissions() {
+    var onChange: ((PermissionState) -> Void)?
+
+    var current: PermissionState {
+        PermissionState(
+            hasAccessibility: AXIsProcessTrusted(),
+            hasDeviceControl: IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+        )
+    }
+
+    private var timer: Timer?
+    private var lastState: PermissionState?
+
+    func requestRequiredPermissions() {
         requestAccessibilityIfNeeded()
 
         if IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeUnknown {
@@ -12,21 +34,38 @@ enum PermissionsService {
         }
     }
 
-    static var hasRequiredPermissions: Bool {
-        AXIsProcessTrusted() && hasDeviceControlPermission
+    func startMonitoring() {
+        guard timer == nil else { return }
+        publishIfChanged()
+
+        let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.publishIfChanged()
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
     }
 
-    static var hasDeviceControlPermission: Bool {
-        IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+    func stopMonitoring() {
+        timer?.invalidate()
+        timer = nil
     }
 
-    private static func requestAccessibilityIfNeeded() {
+    private func publishIfChanged() {
+        let state = current
+        guard state != lastState else { return }
+        lastState = state
+        onChange?(state)
+    }
+
+    private func requestAccessibilityIfNeeded() {
         guard !AXIsProcessTrusted() else { return }
 
         let defaults = UserDefaults.standard
-        guard !defaults.bool(forKey: accessibilityRequestKey) else { return }
+        guard !defaults.bool(forKey: Self.accessibilityRequestKey) else { return }
 
-        defaults.set(true, forKey: accessibilityRequestKey)
+        defaults.set(true, forKey: Self.accessibilityRequestKey)
         AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
     }
 }

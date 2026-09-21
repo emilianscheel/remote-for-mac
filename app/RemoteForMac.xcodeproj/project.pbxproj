@@ -21,6 +21,8 @@
 		A0010000000000000000000C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000E /* XCTest.framework */; };
 		A0010000000000000000000D /* Icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000012 /* Icon.icon */; };
 		A0010000000000000000000E /* ApplicationContextService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000013 /* ApplicationContextService.swift */; };
+		A0010000000000000000000F /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000014 /* UpdateService.swift */; };
+		A00100000000000000000010 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000002 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +55,7 @@
 		A00200000000000000000011 /* RemoteForMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RemoteForMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00200000000000000000012 /* Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Icon.icon; sourceTree = "<group>"; };
 		A00200000000000000000013 /* ApplicationContextService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationContextService.swift; sourceTree = "<group>"; };
+		A00200000000000000000014 /* UpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00100000000000000000010 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +128,7 @@
 				A00200000000000000000009 /* TouchService.swift */,
 				A0020000000000000000000A /* AppService.swift */,
 				A00200000000000000000013 /* ApplicationContextService.swift */,
+				A00200000000000000000014 /* UpdateService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -179,6 +184,9 @@
 			dependencies = (
 			);
 			name = RemoteForMac;
+			packageProductDependencies = (
+				A10000000000000000000002 /* Sparkle */,
+			);
 			productName = "Remote for Mac";
 			productReference = A00200000000000000000010 /* Remote for Mac.app */;
 			productType = "com.apple.product-type.application";
@@ -229,6 +237,9 @@
 				Base,
 			);
 			mainGroup = A04000000000000000000001;
+			packageReferences = (
+				A10000000000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = A04000000000000000000009 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -273,6 +284,7 @@
 				A00100000000000000000009 /* TouchService.swift in Sources */,
 				A0010000000000000000000A /* AppService.swift in Sources */,
 				A0010000000000000000000E /* ApplicationContextService.swift in Sources */,
+				A0010000000000000000000F /* UpdateService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -323,7 +335,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_TESTABILITY = YES;
@@ -335,7 +347,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-F/System/Library/PrivateFrameworks",
@@ -359,7 +371,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -370,7 +382,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-F/System/Library/PrivateFrameworks",
@@ -443,6 +455,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A10000000000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A10000000000000000000002 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000000000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A01000000000000000000001 /* Project object */;
 }

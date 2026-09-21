@@ -24,5 +24,19 @@
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Remote for Mac uses Bluetooth to find and connect your Siri Remote.</string>
+	<key>SUAllowsAutomaticUpdates</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://remote-for-mac.vercel.app/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>j5KJu5mxn0DztOX75CtyaDtO9VycgJ78HDKZKf+/aok=</string>
+	<key>SUScheduledCheckInterval</key>
+	<real>86400</real>
+	<key>SUShowReleaseNotes</key>
+	<false/>
 </dict>
 </plist>

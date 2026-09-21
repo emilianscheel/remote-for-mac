@@ -1,11 +1,18 @@
 import AppKit
 
 struct ApplicationContextService: ApplicationContextProviding {
-    private static let keynoteBundleIdentifier = "com.apple.iWork.Keynote"
+    private static let contextsByBundleIdentifier: [String: ApplicationContext] = [
+        "com.apple.Keynote": .keynote,
+        "com.apple.iWork.Keynote": .keynote,
+        "com.microsoft.Powerpoint": .powerPoint,
+    ]
 
     func currentContext() -> ApplicationContext {
-        NSWorkspace.shared.frontmostApplication?.bundleIdentifier == Self.keynoteBundleIdentifier
-            ? .keynote
-            : .standard
+        Self.context(for: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
+    }
+
+    static func context(for bundleIdentifier: String?) -> ApplicationContext {
+        guard let bundleIdentifier else { return .standard }
+        return contextsByBundleIdentifier[bundleIdentifier] ?? .standard
     }
 }
