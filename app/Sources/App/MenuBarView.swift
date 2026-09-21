@@ -38,8 +38,10 @@ struct MenuBarView: View {
 
         Divider()
 
-        Button("Open Bluetooth Settings…", systemImage: "gearshape", action: service.openBluetoothSettings)
-            .labelStyle(.titleAndIcon)
+        if !service.connectionState.isConnected {
+            Button("Open Bluetooth Settings…", systemImage: "gearshape", action: service.openBluetoothSettings)
+                .labelStyle(.titleAndIcon)
+        }
 
         if !service.hasDeviceControlPermission {
             Button(

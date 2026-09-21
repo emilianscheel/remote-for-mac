@@ -6,6 +6,11 @@ final class AppService: ObservableObject {
     @Published private(set) var connectionState: ConnectionState = .disconnected
     @Published private(set) var nearbyRemotes: [NearbyRemote] = []
     @Published private(set) var hasDeviceControlPermission = PermissionsService.hasDeviceControlPermission
+    @Published private(set) var hasRequiredPermissions = PermissionsService.hasRequiredPermissions
+
+    var isReady: Bool {
+        connectionState.isConnected && hasRequiredPermissions
+    }
 
     private let bluetooth: BluetoothServicing
     private let remoteInput: RemoteInputServicing
@@ -39,6 +44,7 @@ final class AppService: ObservableObject {
 
     func refreshPermissions() {
         hasDeviceControlPermission = PermissionsService.hasDeviceControlPermission
+        hasRequiredPermissions = PermissionsService.hasRequiredPermissions
     }
 
     func beginScanning() {
