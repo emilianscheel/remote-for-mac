@@ -7,3 +7,19 @@ Open `RemoteForMac.xcodeproj`, select the `RemoteForMac` scheme, and run it. The
 Keep the selected development team and the `com.local.RemoteForMac` bundle identifier unchanged. macOS associates Device Control and Data Access grants with that signed identity, so subsequent launches and rebuilds do not ask again.
 
 The app deliberately uses the private `MultitouchSupport` framework for clickpad gestures, so it is intended for direct distribution rather than the Mac App Store.
+
+## Release
+
+Install a Developer ID Application certificate and save notarization credentials once:
+
+```bash
+xcrun notarytool store-credentials "RemoteForMac" --team-id "9GALM9GLFA"
+```
+
+Then create the signed and notarized disk image:
+
+```bash
+./release.sh
+```
+
+The script archives a Release build with Hardened Runtime, creates and notarizes the disk image, staples the notarization ticket, verifies the result, and writes `RemoteForMac.dmg` to the project root. Set `NOTARY_PROFILE`, `TEAM_ID`, or `SIGNING_IDENTITY` in the environment when using different signing credentials.
