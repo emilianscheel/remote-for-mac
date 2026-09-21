@@ -18,6 +18,8 @@ final class AppService: ObservableObject {
     private let applicationContext: ApplicationContextProviding
     private let permissions: PermissionServicing
     private let updater: UpdateServicing
+    private var bluetoothRemotes: [NearbyRemote] = []
+    private var hasSystemRemote = false
     private var selectedRemote: NearbyRemote?
     private var userDisconnected = false
     private var hasStarted = false
@@ -66,12 +68,18 @@ final class AppService: ObservableObject {
         selectedRemote = remote
         connectionState = .connecting(remote.name)
         remoteInput.start()
-        bluetooth.connect(to: remote)
+
+        if remote.id == Self.systemRemote.id {
+            connectionState = .connected(remote.name)
+            remoteInput.setEnabled(true)
+        } else {
+            bluetooth.connect(to: remote)
+        }
     }
 
     func disconnect() {
         userDisconnected = true
-        remoteInput.stop()
+        remoteInput.setEnabled(false)
         bluetooth.disconnect()
         selectedRemote = nil
         connectionState = .disconnected
@@ -101,7 +109,8 @@ final class AppService: ObservableObject {
         }
         bluetooth.onRemotesChanged = { [weak self] remotes in
             guard let self else { return }
-            nearbyRemotes = remotes
+            bluetoothRemotes = remotes
+            publishNearbyRemotes()
             if !connectionState.isConnected, selectedRemote == nil { connectionState = .scanning }
         }
         bluetooth.onConnected = { [weak self] remote in
@@ -117,8 +126,13 @@ final class AppService: ObservableObject {
         }
         remoteInput.onConnectionChanged = { [weak self] connected in
             guard let self else { return }
+            hasSystemRemote = connected
+            publishNearbyRemotes()
+
             if connected, !userDisconnected {
-                let name = selectedRemote?.name ?? "Siri Remote"
+                let remote = selectedRemote ?? Self.systemRemote
+                selectedRemote = remote
+                let name = remote.name
                 connectionState = .connected(name)
                 remoteInput.setEnabled(true)
             } else if !connected, connectionState.isConnected {
@@ -140,4 +154,20 @@ final class AppService: ObservableObject {
         hasDeviceControlPermission = permissions.hasDeviceControl
         hasRequiredPermissions = permissions.hasRequiredPermissions
     }
+
+    private func publishNearbyRemotes() {
+        var remotes = bluetoothRemotes
+        if hasSystemRemote, !remotes.contains(where: { $0.name == Self.systemRemote.name }) {
+            remotes.append(Self.systemRemote)
+        }
+        nearbyRemotes = remotes.sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+    }
+
+    private static let systemRemote = NearbyRemote(
+        id: "system-connected-remote",
+        name: "Apple TV Remote",
+        isPaired: true
+    )
 }

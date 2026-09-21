@@ -38,7 +38,7 @@ struct MenuBarView: View {
 
         Divider()
 
-        if !service.connectionState.isConnected {
+        if service.nearbyRemotes.isEmpty {
             Button("Open Bluetooth Settings…", systemImage: "gearshape", action: service.openBluetoothSettings)
                 .labelStyle(.titleAndIcon)
         }

@@ -137,8 +137,35 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(service.connectionState, .disconnected)
         XCTAssertFalse(service.connectionState.isConnected)
         XCTAssertEqual(input.enabledValues.last, false)
-        XCTAssertEqual(input.stopCount, 1)
+        XCTAssertEqual(input.stopCount, 0)
         XCTAssertEqual(bluetooth.disconnectCount, 1)
+        XCTAssertEqual(service.nearbyRemotes, [remote])
+    }
+
+    @MainActor
+    func testSystemConnectedRemoteRemainsAvailableForReconnect() {
+        let bluetooth = BluetoothMock()
+        let input = RemoteInputMock()
+        let service = AppService(
+            bluetooth: bluetooth,
+            remoteInput: input,
+            actionDispatcher: ActionDispatcherMock()
+        )
+
+        input.onConnectionChanged?(true)
+        XCTAssertEqual(service.connectionState, .connected("Apple TV Remote"))
+        XCTAssertEqual(service.nearbyRemotes.map(\.name), ["Apple TV Remote"])
+
+        service.disconnect()
+        XCTAssertEqual(service.connectionState, .disconnected)
+        XCTAssertEqual(service.nearbyRemotes.map(\.name), ["Apple TV Remote"])
+        XCTAssertEqual(input.enabledValues.last, false)
+
+        let remote = try! XCTUnwrap(service.nearbyRemotes.first)
+        service.connect(to: remote)
+        XCTAssertEqual(service.connectionState, .connected("Apple TV Remote"))
+        XCTAssertEqual(input.enabledValues.last, true)
+        XCTAssertTrue(bluetooth.connectedRemotes.isEmpty)
     }
 
     @MainActor
@@ -195,7 +222,7 @@ final class RemoteForMacTests: XCTestCase {
 
     @MainActor
     func testReleaseVersionIsExposedToTheMenu() {
-        XCTAssertEqual(AppVersion.current, "1.2")
+        XCTAssertEqual(AppVersion.current, "1.3")
         XCTAssertEqual(
             Bundle.main.object(forInfoDictionaryKey: "SUScheduledCheckInterval") as? Double,
             86_400
@@ -213,10 +240,11 @@ private final class BluetoothMock: BluetoothServicing {
     var onFailure: ((String) -> Void)?
     var startScanningCount = 0
     var disconnectCount = 0
+    var connectedRemotes: [NearbyRemote] = []
 
     func startScanning() { startScanningCount += 1 }
     func stopScanning() {}
-    func connect(to remote: NearbyRemote) {}
+    func connect(to remote: NearbyRemote) { connectedRemotes.append(remote) }
     func disconnect() { disconnectCount += 1 }
 }
 

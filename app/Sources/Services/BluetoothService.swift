@@ -40,7 +40,6 @@ final class BluetoothService: NSObject, BluetoothServicing {
     func disconnect() {
         guard let selectedID, let peripheral = peripherals[selectedID] else { return }
         central.cancelPeripheralConnection(peripheral)
-        self.selectedID = nil
     }
 
     private func beginScanWhenReady() {
