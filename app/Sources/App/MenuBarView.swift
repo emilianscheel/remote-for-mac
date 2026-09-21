@@ -15,14 +15,12 @@ struct MenuBarView: View {
         Divider()
 
         if service.connectionState.isConnected {
-            Button("Disconnect", systemImage: "xmark.circle", action: service.disconnect)
+            Button("Disconnect", systemImage: "xmark", action: service.disconnect)
                 .labelStyle(.titleAndIcon)
         } else {
-            Text("Hold Back + Volume Up for 5 seconds.")
-                .disabled(true)
-
-            Button("Open Bluetooth Settings…", systemImage: "gearshape", action: service.openBluetoothSettings)
+            Button("Hold Back + Volume Up for 5 seconds.", systemImage: "info") {}
                 .labelStyle(.titleAndIcon)
+                .disabled(true)
 
             if service.nearbyRemotes.isEmpty {
                 Button("Searching…", systemImage: "dot.radiowaves.left.and.right") {}
@@ -38,9 +36,12 @@ struct MenuBarView: View {
             }
         }
 
-        if !service.hasDeviceControlPermission {
-            Divider()
+        Divider()
 
+        Button("Open Bluetooth Settings…", systemImage: "gearshape", action: service.openBluetoothSettings)
+            .labelStyle(.titleAndIcon)
+
+        if !service.hasDeviceControlPermission {
             Button(
                 "Open Device Control Settings…",
                 systemImage: "hand.raised",
