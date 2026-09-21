@@ -7,8 +7,6 @@ final class BluetoothService: NSObject, BluetoothServicing {
     var onFailure: ((String) -> Void)?
 
     private static let knownPeripheralIDsKey = "knownRemotePeripheralIDs"
-    private static var hidService: CBUUID { CBUUID(string: "1812") }
-    private static var reportMapCharacteristic: CBUUID { CBUUID(string: "2A4B") }
 
     private lazy var central = CBCentralManager(delegate: self, queue: .main)
     private var peripherals: [UUID: CBPeripheral] = [:]
@@ -36,7 +34,6 @@ final class BluetoothService: NSObject, BluetoothServicing {
 
         stopScanning()
         selectedID = id
-        peripheral.delegate = self
         central.connect(peripheral)
     }
 
@@ -130,8 +127,6 @@ extension BluetoothService: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         saveAsKnown(peripheral.identifier)
-        peripheral.delegate = self
-        peripheral.discoverServices([Self.hidService])
 
         let name = names[peripheral.identifier] ?? peripheral.name ?? "Siri Remote"
         let remote = NearbyRemote(id: peripheral.identifier.uuidString, name: name, isPaired: true)
@@ -151,33 +146,5 @@ extension BluetoothService: CBCentralManagerDelegate {
         guard selectedID == peripheral.identifier else { return }
         selectedID = nil
         if let error { onFailure?("Remote disconnected: \(error.localizedDescription)") }
-    }
-}
-
-extension BluetoothService: CBPeripheralDelegate {
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        guard error == nil else {
-            onFailure?("Could not read remote services")
-            return
-        }
-
-        guard let hidService = peripheral.services?.first(where: { $0.uuid == Self.hidService }) else {
-            onFailure?("Unsupported remote")
-            return
-        }
-        peripheral.discoverCharacteristics(nil, for: hidService)
-    }
-
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard error == nil else {
-            onFailure?("Could not initialize remote")
-            return
-        }
-
-        // Reading the protected HID report map asks macOS to establish the bond.
-        // Once bonded, the system HID driver exposes the remote through IOHIDManager.
-        if let reportMap = service.characteristics?.first(where: { $0.uuid == Self.reportMapCharacteristic }) {
-            peripheral.readValue(for: reportMap)
-        }
     }
 }

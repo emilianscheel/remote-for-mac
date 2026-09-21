@@ -77,6 +77,7 @@ final class RemoteForMacTests: XCTestCase {
 
         service.connect(to: remote)
         XCTAssertEqual(service.connectionState, .connecting("Siri Remote"))
+        XCTAssertEqual(input.startCount, 1)
         bluetooth.onConnected?(remote)
         XCTAssertEqual(service.connectionState, .connected("Siri Remote"))
         XCTAssertTrue(service.connectionState.isConnected)
@@ -89,6 +90,7 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(service.connectionState, .disconnected)
         XCTAssertFalse(service.connectionState.isConnected)
         XCTAssertEqual(input.enabledValues.last, false)
+        XCTAssertEqual(input.stopCount, 1)
         XCTAssertEqual(bluetooth.disconnectCount, 1)
     }
 }
@@ -110,9 +112,14 @@ private final class RemoteInputMock: RemoteInputServicing {
     var onConnectionChanged: ((Bool) -> Void)?
     var onInput: ((RemoteInput) -> Void)?
     var enabledValues: [Bool] = []
+    var startCount = 0
+    var stopCount = 0
 
-    func start() {}
-    func stop() {}
+    func start() { startCount += 1 }
+    func stop() {
+        stopCount += 1
+        enabledValues.append(false)
+    }
     func setEnabled(_ enabled: Bool) { enabledValues.append(enabled) }
 }
 

@@ -42,15 +42,15 @@ final class AppService: ObservableObject {
         userDisconnected = false
         selectedRemote = remote
         connectionState = .connecting(remote.name)
+        remoteInput.start()
         bluetooth.connect(to: remote)
     }
 
     func disconnect() {
         userDisconnected = true
-        remoteInput.setEnabled(false)
+        remoteInput.stop()
         bluetooth.disconnect()
         selectedRemote = nil
-        nearbyRemotes.removeAll()
         connectionState = .disconnected
         bluetooth.startScanning()
     }
@@ -76,10 +76,11 @@ final class AppService: ObservableObject {
             guard let self, !userDisconnected else { return }
             selectedRemote = remote
             connectionState = .connected(remote.name)
+            remoteInput.start()
             remoteInput.setEnabled(true)
         }
         bluetooth.onFailure = { [weak self] message in
-            guard let self else { return }
+            guard let self, !connectionState.isConnected else { return }
             connectionState = .failed(message)
         }
         remoteInput.onConnectionChanged = { [weak self] connected in
@@ -89,7 +90,8 @@ final class AppService: ObservableObject {
                 connectionState = .connected(name)
                 remoteInput.setEnabled(true)
             } else if !connected, connectionState.isConnected {
-                remoteInput.setEnabled(false)
+                userDisconnected = true
+                remoteInput.stop()
                 selectedRemote = nil
                 connectionState = .disconnected
                 bluetooth.startScanning()
