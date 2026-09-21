@@ -21,3 +21,7 @@ protocol RemoteInputServicing: AnyObject {
 protocol MacActionDispatching {
     func dispatch(_ action: MacAction)
 }
+
+protocol ApplicationContextProviding {
+    func currentContext() -> ApplicationContext
+}

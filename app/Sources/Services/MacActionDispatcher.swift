@@ -12,6 +12,8 @@ struct MacActionDispatcher: MacActionDispatching {
             postKey(CGKeyCode(kVK_Return))
         case .escape:
             postKey(CGKeyCode(kVK_Escape))
+        case .keyboardShortcut(let shortcut):
+            postKey(keyCode(for: shortcut.key), flags: flags(for: shortcut.modifiers))
         case .media(let key):
             postMediaKey(mediaKeyCode(for: key))
         case .missionControl:
@@ -32,6 +34,21 @@ struct MacActionDispatcher: MacActionDispatching {
         case .right: code = kVK_RightArrow
         }
         return CGKeyCode(code)
+    }
+
+    private func keyCode(for key: KeyboardKey) -> CGKeyCode {
+        switch key {
+        case .p: CGKeyCode(kVK_ANSI_P)
+        }
+    }
+
+    private func flags(for modifiers: Set<KeyboardModifier>) -> CGEventFlags {
+        modifiers.reduce(into: CGEventFlags()) { flags, modifier in
+            switch modifier {
+            case .command: flags.insert(.maskCommand)
+            case .option: flags.insert(.maskAlternate)
+            }
+        }
     }
 
     private func mediaKeyCode(for key: MediaKey) -> Int32 {

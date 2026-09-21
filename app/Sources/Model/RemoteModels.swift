@@ -52,10 +52,30 @@ enum MediaKey: Equatable {
     case playPause, mute, volumeUp, volumeDown, fastForward, rewind
 }
 
+enum ApplicationContext: Equatable {
+    case standard
+    case keynote
+}
+
+enum KeyboardKey: Equatable {
+    case p
+}
+
+enum KeyboardModifier: Hashable {
+    case command
+    case option
+}
+
+struct KeyboardShortcut: Equatable {
+    let key: KeyboardKey
+    let modifiers: Set<KeyboardModifier>
+}
+
 enum MacAction: Equatable {
     case arrow(Direction)
     case enter
     case escape
+    case keyboardShortcut(KeyboardShortcut)
     case media(MediaKey)
     case missionControl
     case siri
@@ -63,8 +83,19 @@ enum MacAction: Equatable {
 }
 
 enum RemoteActionMap {
-    static func action(for input: RemoteInput) -> MacAction {
-        switch input {
+    private static let keynoteOverrides: [RemoteInput: MacAction] = [
+        .playPause: .keyboardShortcut(
+            KeyboardShortcut(key: .p, modifiers: [.command, .option])
+        ),
+        .back: .escape,
+    ]
+
+    static func action(for input: RemoteInput, in context: ApplicationContext = .standard) -> MacAction {
+        if context == .keynote, let action = keynoteOverrides[input] {
+            return action
+        }
+
+        return switch input {
         case .direction(let direction), .swipe(let direction): .arrow(direction)
         case .center: .enter
         case .back: .escape

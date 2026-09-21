@@ -10,6 +10,7 @@ final class AppService: ObservableObject {
     private let bluetooth: BluetoothServicing
     private let remoteInput: RemoteInputServicing
     private let actionDispatcher: MacActionDispatching
+    private let applicationContext: ApplicationContextProviding
     private var selectedRemote: NearbyRemote?
     private var userDisconnected = false
     private var hasStarted = false
@@ -17,11 +18,13 @@ final class AppService: ObservableObject {
     init(
         bluetooth: BluetoothServicing = BluetoothService(),
         remoteInput: RemoteInputServicing = RemoteInputService(),
-        actionDispatcher: MacActionDispatching = MacActionDispatcher()
+        actionDispatcher: MacActionDispatching = MacActionDispatcher(),
+        applicationContext: ApplicationContextProviding = ApplicationContextService()
     ) {
         self.bluetooth = bluetooth
         self.remoteInput = remoteInput
         self.actionDispatcher = actionDispatcher
+        self.applicationContext = applicationContext
         bindServices()
     }
 
@@ -109,7 +112,9 @@ final class AppService: ObservableObject {
             }
         }
         remoteInput.onInput = { [weak self] input in
-            self?.actionDispatcher.dispatch(RemoteActionMap.action(for: input))
+            guard let self else { return }
+            let action = RemoteActionMap.action(for: input, in: applicationContext.currentContext())
+            actionDispatcher.dispatch(action)
         }
     }
 }

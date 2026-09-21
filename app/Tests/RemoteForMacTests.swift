@@ -31,6 +31,17 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(RemoteActionMap.action(for: .circularCounterclockwise), .media(.rewind))
     }
 
+    func testKeynoteOverridesAreDeclarativeAndContextual() {
+        let playShortcut = KeyboardShortcut(key: .p, modifiers: [.command, .option])
+
+        XCTAssertEqual(
+            RemoteActionMap.action(for: .playPause, in: .keynote),
+            .keyboardShortcut(playShortcut)
+        )
+        XCTAssertEqual(RemoteActionMap.action(for: .back, in: .keynote), .escape)
+        XCTAssertEqual(RemoteActionMap.action(for: .playPause, in: .standard), .media(.playPause))
+    }
+
     func testHIDUsages() {
         XCTAssertEqual(RemoteInputService.input(usagePage: 0x0C, usage: 0x44), .direction(.left))
         XCTAssertEqual(RemoteInputService.input(usagePage: 0x0C, usage: 0xE2), .mute)
@@ -93,6 +104,26 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(input.stopCount, 1)
         XCTAssertEqual(bluetooth.disconnectCount, 1)
     }
+
+    @MainActor
+    func testAppServiceUsesTheForegroundApplicationContext() {
+        let input = RemoteInputMock()
+        let dispatcher = ActionDispatcherMock()
+        let service = AppService(
+            bluetooth: BluetoothMock(),
+            remoteInput: input,
+            actionDispatcher: dispatcher,
+            applicationContext: ApplicationContextMock(context: .keynote)
+        )
+
+        input.onInput?(.playPause)
+
+        XCTAssertEqual(
+            dispatcher.actions,
+            [.keyboardShortcut(KeyboardShortcut(key: .p, modifiers: [.command, .option]))]
+        )
+        _ = service
+    }
 }
 
 private final class BluetoothMock: BluetoothServicing {
@@ -126,4 +157,9 @@ private final class RemoteInputMock: RemoteInputServicing {
 private final class ActionDispatcherMock: MacActionDispatching {
     var actions: [MacAction] = []
     func dispatch(_ action: MacAction) { actions.append(action) }
+}
+
+private struct ApplicationContextMock: ApplicationContextProviding {
+    let context: ApplicationContext
+    func currentContext() -> ApplicationContext { context }
 }

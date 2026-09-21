@@ -20,6 +20,7 @@
 		A0010000000000000000000B /* RemoteForMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000B /* RemoteForMacTests.swift */; };
 		A0010000000000000000000C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000E /* XCTest.framework */; };
 		A0010000000000000000000D /* Icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000012 /* Icon.icon */; };
+		A0010000000000000000000E /* ApplicationContextService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000013 /* ApplicationContextService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		A00200000000000000000010 /* Remote for Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Remote for Mac.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00200000000000000000011 /* RemoteForMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RemoteForMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00200000000000000000012 /* Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Icon.icon; sourceTree = "<group>"; };
+		A00200000000000000000013 /* ApplicationContextService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationContextService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +123,7 @@
 				A00200000000000000000008 /* RemoteInputService.swift */,
 				A00200000000000000000009 /* TouchService.swift */,
 				A0020000000000000000000A /* AppService.swift */,
+				A00200000000000000000013 /* ApplicationContextService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -269,6 +272,7 @@
 				A00100000000000000000008 /* RemoteInputService.swift in Sources */,
 				A00100000000000000000009 /* TouchService.swift in Sources */,
 				A0010000000000000000000A /* AppService.swift in Sources */,
+				A0010000000000000000000E /* ApplicationContextService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
