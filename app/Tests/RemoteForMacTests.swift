@@ -10,6 +10,7 @@ final class RemoteForMacTests: XCTestCase {
 
     func testDiscoveryNameFiltering() {
         XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "Siri Remote"))
+        XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "siriremote"))
         XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "Apple TV Remote"))
         XCTAssertFalse(RemoteMatcher.isDiscoverableRemote(name: "Magic Keyboard"))
     }

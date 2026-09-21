@@ -55,6 +55,11 @@ final class AppService: ObservableObject {
         bluetooth.startScanning()
     }
 
+    func openBluetoothSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.BluetoothSettings") else { return }
+        NSWorkspace.shared.open(url)
+    }
+
     func quit() {
         remoteInput.stop()
         bluetooth.stopScanning()

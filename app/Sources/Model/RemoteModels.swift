@@ -91,7 +91,9 @@ struct RemoteMatcher {
 
     static func isDiscoverableRemote(name: String?) -> Bool {
         guard let name = name?.lowercased() else { return false }
-        return name.contains("siri remote") || name.contains("apple tv remote")
+        return name.contains("siriremote")
+            || name.contains("siri remote")
+            || name.contains("apple tv remote")
     }
 }
 

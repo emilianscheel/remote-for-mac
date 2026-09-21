@@ -13,6 +13,9 @@ struct MenuBarView: View {
             Menu("Connect") {
                 Text("Hold Back + Volume Up for 5 seconds.")
                     .disabled(true)
+                Button("Open Bluetooth Settings…") {
+                    service.openBluetoothSettings()
+                }
                 Divider()
                 if service.nearbyRemotes.isEmpty {
                     Text("Searching…")
