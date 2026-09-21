@@ -48,7 +48,7 @@
 		A0020000000000000000000D /* RemoteForMac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RemoteForMac-Bridging-Header.h"; sourceTree = "<group>"; };
 		A0020000000000000000000E /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		A0020000000000000000000F /* MultitouchSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MultitouchSupport.h; sourceTree = "<group>"; };
-		A00200000000000000000010 /* RemoteForMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RemoteForMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00200000000000000000010 /* Remote for Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Remote for Mac.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00200000000000000000011 /* RemoteForMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RemoteForMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00200000000000000000012 /* Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Icon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -154,7 +154,7 @@
 		A04000000000000000000009 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A00200000000000000000010 /* RemoteForMac.app */,
+				A00200000000000000000010 /* Remote for Mac.app */,
 				A00200000000000000000011 /* RemoteForMacTests.xctest */,
 			);
 			name = Products;
@@ -176,8 +176,8 @@
 			dependencies = (
 			);
 			name = RemoteForMac;
-			productName = RemoteForMac;
-			productReference = A00200000000000000000010 /* RemoteForMac.app */;
+			productName = "Remote for Mac";
+			productReference = A00200000000000000000010 /* Remote for Mac.app */;
 			productType = "com.apple.product-type.application";
 		};
 		A02000000000000000000002 /* RemoteForMacTests */ = {
@@ -339,7 +339,7 @@
 					MultitouchSupport,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMac;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Remote for Mac";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Support/RemoteForMac-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -373,7 +373,7 @@
 					MultitouchSupport,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMac;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Remote for Mac";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Support/RemoteForMac-Bridging-Header.h";
 				SWIFT_STRICT_CONCURRENCY = minimal;
@@ -389,7 +389,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMacTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_STRICT_CONCURRENCY = minimal;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RemoteForMac.app/Contents/MacOS/RemoteForMac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Remote for Mac.app/Contents/MacOS/Remote for Mac";
 			};
 			name = Debug;
 		};
@@ -402,7 +402,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMacTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_STRICT_CONCURRENCY = minimal;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RemoteForMac.app/Contents/MacOS/RemoteForMac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Remote for Mac.app/Contents/MacOS/Remote for Mac";
 			};
 			name = Release;
 		};

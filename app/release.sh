@@ -2,18 +2,19 @@
 
 set -euo pipefail
 
-readonly APP_NAME="RemoteForMac"
+readonly APP_NAME="Remote for Mac"
+readonly SCHEME_NAME="RemoteForMac"
 readonly TEAM_ID="${TEAM_ID:-9GALM9GLFA}"
 readonly NOTARY_PROFILE="${NOTARY_PROFILE:-RemoteForMac}"
 readonly SIGNING_IDENTITY="${SIGNING_IDENTITY:-Developer ID Application}"
 readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 readonly PROJECT="$SCRIPT_DIR/RemoteForMac.xcodeproj"
-readonly OUTPUT_DMG="$PROJECT_ROOT/RemoteForMac.dmg"
+readonly OUTPUT_DMG="$PROJECT_ROOT/$APP_NAME.dmg"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/RemoteForMac-release.XXXXXX")"
 readonly ARCHIVE="$WORK_DIR/RemoteForMac.xcarchive"
 readonly STAGING="$WORK_DIR/dmg"
-readonly UNSIGNED_DMG="$WORK_DIR/RemoteForMac.dmg"
+readonly UNSIGNED_DMG="$WORK_DIR/$APP_NAME.dmg"
 
 cleanup() {
   rm -rf "$WORK_DIR"
@@ -40,7 +41,7 @@ fi
 echo "Archiving $APP_NAME with Hardened Runtime..."
 xcodebuild archive \
   -project "$PROJECT" \
-  -scheme "$APP_NAME" \
+  -scheme "$SCHEME_NAME" \
   -configuration Release \
   -destination "generic/platform=macOS" \
   -archivePath "$ARCHIVE" \
