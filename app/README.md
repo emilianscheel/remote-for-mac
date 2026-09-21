@@ -24,4 +24,4 @@ Then create the signed and notarized disk image:
 ./release.sh
 ```
 
-The script asks Xcode to automatically select the team's Developer ID Application certificate. It archives a Release build with Hardened Runtime, creates and notarizes the disk image, staples the notarization ticket, verifies the result, and writes `RemoteForMac.dmg` to the project root. Set `NOTARY_PROFILE`, `TEAM_ID`, or `SIGNING_IDENTITY` in the environment when using different signing credentials.
+The script uses manual distribution signing and asks Keychain to select the team's installed Developer ID Application certificate. It archives a Release build with Hardened Runtime, creates and notarizes the disk image, staples the notarization ticket, verifies the result, and writes `RemoteForMac.dmg` to the project root. Set `NOTARY_PROFILE`, `TEAM_ID`, or `SIGNING_IDENTITY` in the environment when using different signing credentials.

@@ -45,10 +45,9 @@ xcodebuild archive \
   -destination "generic/platform=macOS" \
   -archivePath "$ARCHIVE" \
   DEVELOPMENT_TEAM="$TEAM_ID" \
-  CODE_SIGN_STYLE=Automatic \
+  CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
-  ENABLE_HARDENED_RUNTIME=YES \
-  -allowProvisioningUpdates
+  ENABLE_HARDENED_RUNTIME=YES
 
 readonly APP="$ARCHIVE/Products/Applications/$APP_NAME.app"
 
