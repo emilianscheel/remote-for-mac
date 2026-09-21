@@ -1,0 +1,428 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 71;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00100000000000000000001 /* RemoteForMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000001 /* RemoteForMacApp.swift */; };
+		A00100000000000000000002 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000002 /* MenuBarView.swift */; };
+		A00100000000000000000003 /* RemoteModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000003 /* RemoteModels.swift */; };
+		A00100000000000000000004 /* ServiceProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000004 /* ServiceProtocols.swift */; };
+		A00100000000000000000005 /* PermissionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000005 /* PermissionsService.swift */; };
+		A00100000000000000000006 /* MacActionDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000006 /* MacActionDispatcher.swift */; };
+		A00100000000000000000007 /* BluetoothService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000007 /* BluetoothService.swift */; };
+		A00100000000000000000008 /* RemoteInputService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000008 /* RemoteInputService.swift */; };
+		A00100000000000000000009 /* TouchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000009 /* TouchService.swift */; };
+		A0010000000000000000000A /* AppService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000A /* AppService.swift */; };
+		A0010000000000000000000B /* RemoteForMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000B /* RemoteForMacTests.swift */; };
+		A0010000000000000000000C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000E /* XCTest.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A00300000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A01000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A02000000000000000000001;
+			remoteInfo = RemoteForMac;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A00200000000000000000001 /* RemoteForMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteForMacApp.swift; sourceTree = "<group>"; };
+		A00200000000000000000002 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		A00200000000000000000003 /* RemoteModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteModels.swift; sourceTree = "<group>"; };
+		A00200000000000000000004 /* ServiceProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProtocols.swift; sourceTree = "<group>"; };
+		A00200000000000000000005 /* PermissionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsService.swift; sourceTree = "<group>"; };
+		A00200000000000000000006 /* MacActionDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacActionDispatcher.swift; sourceTree = "<group>"; };
+		A00200000000000000000007 /* BluetoothService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothService.swift; sourceTree = "<group>"; };
+		A00200000000000000000008 /* RemoteInputService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteInputService.swift; sourceTree = "<group>"; };
+		A00200000000000000000009 /* TouchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchService.swift; sourceTree = "<group>"; };
+		A0020000000000000000000A /* AppService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppService.swift; sourceTree = "<group>"; };
+		A0020000000000000000000B /* RemoteForMacTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteForMacTests.swift; sourceTree = "<group>"; };
+		A0020000000000000000000C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A0020000000000000000000D /* RemoteForMac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RemoteForMac-Bridging-Header.h"; sourceTree = "<group>"; };
+		A0020000000000000000000E /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+		A0020000000000000000000F /* MultitouchSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MultitouchSupport.h; sourceTree = "<group>"; };
+		A00200000000000000000010 /* RemoteForMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RemoteForMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00200000000000000000011 /* RemoteForMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RemoteForMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A03000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A03000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0010000000000000000000C /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A04000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A04000000000000000000002 /* Sources */,
+				A04000000000000000000006 /* Support */,
+				A04000000000000000000007 /* Tests */,
+				A04000000000000000000008 /* Frameworks */,
+				A04000000000000000000009 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A04000000000000000000002 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A04000000000000000000003 /* App */,
+				A04000000000000000000004 /* Model */,
+				A04000000000000000000005 /* Services */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A04000000000000000000003 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000001 /* RemoteForMacApp.swift */,
+				A00200000000000000000002 /* MenuBarView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A04000000000000000000004 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000003 /* RemoteModels.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		A04000000000000000000005 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000004 /* ServiceProtocols.swift */,
+				A00200000000000000000005 /* PermissionsService.swift */,
+				A00200000000000000000006 /* MacActionDispatcher.swift */,
+				A00200000000000000000007 /* BluetoothService.swift */,
+				A00200000000000000000008 /* RemoteInputService.swift */,
+				A00200000000000000000009 /* TouchService.swift */,
+				A0020000000000000000000A /* AppService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A04000000000000000000006 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				A0020000000000000000000C /* Info.plist */,
+				A0020000000000000000000D /* RemoteForMac-Bridging-Header.h */,
+				A0020000000000000000000F /* MultitouchSupport.h */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		A04000000000000000000007 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				A0020000000000000000000B /* RemoteForMacTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		A04000000000000000000008 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A0020000000000000000000E /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A04000000000000000000009 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000010 /* RemoteForMac.app */,
+				A00200000000000000000011 /* RemoteForMacTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A02000000000000000000001 /* RemoteForMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A06000000000000000000002 /* Build configuration list for PBXNativeTarget "RemoteForMac" */;
+			buildPhases = (
+				A05000000000000000000001 /* Sources */,
+				A03000000000000000000001 /* Frameworks */,
+				A05000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RemoteForMac;
+			productName = RemoteForMac;
+			productReference = A00200000000000000000010 /* RemoteForMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A02000000000000000000002 /* RemoteForMacTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A06000000000000000000003 /* Build configuration list for PBXNativeTarget "RemoteForMacTests" */;
+			buildPhases = (
+				A05000000000000000000003 /* Sources */,
+				A03000000000000000000002 /* Frameworks */,
+				A05000000000000000000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A07000000000000000000001 /* PBXTargetDependency */,
+			);
+			name = RemoteForMacTests;
+			productName = RemoteForMacTests;
+			productReference = A00200000000000000000011 /* RemoteForMacTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A01000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					A02000000000000000000001 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					A02000000000000000000002 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = A02000000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = A06000000000000000000001 /* Build configuration list for PBXProject "RemoteForMac" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A04000000000000000000001;
+			productRefGroup = A04000000000000000000009 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A02000000000000000000001 /* RemoteForMac */,
+				A02000000000000000000002 /* RemoteForMacTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A05000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A05000000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A05000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00100000000000000000001 /* RemoteForMacApp.swift in Sources */,
+				A00100000000000000000002 /* MenuBarView.swift in Sources */,
+				A00100000000000000000003 /* RemoteModels.swift in Sources */,
+				A00100000000000000000004 /* ServiceProtocols.swift in Sources */,
+				A00100000000000000000005 /* PermissionsService.swift in Sources */,
+				A00100000000000000000006 /* MacActionDispatcher.swift in Sources */,
+				A00100000000000000000007 /* BluetoothService.swift in Sources */,
+				A00100000000000000000008 /* RemoteInputService.swift in Sources */,
+				A00100000000000000000009 /* TouchService.swift in Sources */,
+				A0010000000000000000000A /* AppService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A05000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0010000000000000000000B /* RemoteForMacTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A07000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A02000000000000000000001 /* RemoteForMac */;
+			targetProxy = A00300000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A08000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A08000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A08000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9GALM9GLFA;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-F/System/Library/PrivateFrameworks",
+					"-framework",
+					MultitouchSupport,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Support/RemoteForMac-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+			};
+			name = Debug;
+		};
+		A08000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9GALM9GLFA;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-F/System/Library/PrivateFrameworks",
+					"-framework",
+					MultitouchSupport,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Support/RemoteForMac-Bridging-Header.h";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+			};
+			name = Release;
+		};
+		A08000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMacTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RemoteForMac.app/Contents/MacOS/RemoteForMac";
+			};
+			name = Debug;
+		};
+		A08000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.RemoteForMacTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RemoteForMac.app/Contents/MacOS/RemoteForMac";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A06000000000000000000001 /* Build configuration list for PBXProject "RemoteForMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A08000000000000000000001 /* Debug */,
+				A08000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A06000000000000000000002 /* Build configuration list for PBXNativeTarget "RemoteForMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A08000000000000000000003 /* Debug */,
+				A08000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A06000000000000000000003 /* Build configuration list for PBXNativeTarget "RemoteForMacTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A08000000000000000000005 /* Debug */,
+				A08000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A01000000000000000000001 /* Project object */;
+}

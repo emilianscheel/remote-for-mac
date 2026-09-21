@@ -1,0 +1,9 @@
+# Remote for Mac
+
+A small macOS 27 menu bar app that uses a USB-C Siri Remote (3rd generation, A2854) to control presentations and common Mac actions.
+
+Open `RemoteForMac.xcodeproj`, select the `RemoteForMac` scheme, and run it. The app requests Accessibility and Input Monitoring access on first launch. Put the remote in pairing mode by holding **Back + Volume Up** for five seconds, then choose it from **Connect** in the menu bar menu.
+
+Keep the selected development team and the `com.local.RemoteForMac` bundle identifier unchanged. macOS associates Device Control and Data Access grants with that signed identity, so subsequent launches and rebuilds do not ask again.
+
+The app deliberately uses the private `MultitouchSupport` framework for clickpad gestures, so it is intended for direct distribution rather than the Mac App Store.
