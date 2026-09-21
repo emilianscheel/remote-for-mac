@@ -10,11 +10,13 @@ The app deliberately uses the private `MultitouchSupport` framework for clickpad
 
 ## Release
 
-Install a Developer ID Application certificate and save notarization credentials once:
+Install a Developer ID Application certificate for the selected Xcode team and save notarization credentials once:
 
 ```bash
-xcrun notarytool store-credentials "RemoteForMac" --team-id "9GALM9GLFA"
+xcrun notarytool store-credentials "RemoteForMac" --apple-id "YOUR_APPLE_ID" --team-id "9GALM9GLFA"
 ```
+
+Enter an app-specific password when prompted. This is a one-time setup and is separate from the signing certificate.
 
 Then create the signed and notarized disk image:
 
@@ -22,4 +24,4 @@ Then create the signed and notarized disk image:
 ./release.sh
 ```
 
-The script archives a Release build with Hardened Runtime, creates and notarizes the disk image, staples the notarization ticket, verifies the result, and writes `RemoteForMac.dmg` to the project root. Set `NOTARY_PROFILE`, `TEAM_ID`, or `SIGNING_IDENTITY` in the environment when using different signing credentials.
+The script asks Xcode to automatically select the team's Developer ID Application certificate. It archives a Release build with Hardened Runtime, creates and notarizes the disk image, staples the notarization ticket, verifies the result, and writes `RemoteForMac.dmg` to the project root. Set `NOTARY_PROFILE`, `TEAM_ID`, or `SIGNING_IDENTITY` in the environment when using different signing credentials.

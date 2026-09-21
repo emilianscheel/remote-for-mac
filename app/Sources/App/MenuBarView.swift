@@ -4,7 +4,10 @@ struct MenuBarView: View {
     @ObservedObject var service: AppService
 
     var body: some View {
-        Text(service.connectionState.isConnected ? "Connected" : "Disconnected")
+        Label(
+            service.connectionState.isConnected ? "Connected" : "Disconnected",
+            systemImage: service.connectionState.isConnected ? "checkmark" : "xmark"
+        )
             .disabled(true)
 
         Divider()
