@@ -11,7 +11,7 @@ readonly SPARKLE_ACCOUNT="${SPARKLE_ACCOUNT:-RemoteForMac}"
 readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 readonly PROJECT="$SCRIPT_DIR/RemoteForMac.xcodeproj"
-readonly OUTPUT_DMG="$PROJECT_ROOT/$APP_NAME.dmg"
+readonly OUTPUT_DMG="$PROJECT_ROOT/web/public/Remote.for.Mac.dmg"
 readonly OUTPUT_APPCAST="$PROJECT_ROOT/web/public/appcast.xml"
 readonly SPM_CACHE_DIR="${SPM_CACHE_DIR:-$HOME/Library/Caches/RemoteForMac/SourcePackages}"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/RemoteForMac-release.XXXXXX")"
@@ -166,8 +166,9 @@ xcrun stapler validate "$UNSIGNED_DMG"
 codesign --verify --verbose=2 "$UNSIGNED_DMG"
 spctl --assess --type open --context context:primary-signature --verbose=2 "$UNSIGNED_DMG"
 
-rm -f "$OUTPUT_DMG"
-cp "$UNSIGNED_DMG" "$OUTPUT_DMG"
+mkdir -p "$(dirname "$OUTPUT_DMG")"
+cp "$UNSIGNED_DMG" "$OUTPUT_DMG.tmp"
+mv "$OUTPUT_DMG.tmp" "$OUTPUT_DMG"
 codesign --verify --verbose=2 "$OUTPUT_DMG"
 xcrun stapler validate "$OUTPUT_DMG"
 
@@ -176,7 +177,7 @@ mkdir -p "$APPCAST_STAGING"
 cp "$OUTPUT_DMG" "$APPCAST_STAGING/Remote.for.Mac.dmg"
 "$GENERATE_APPCAST" \
   --account "$SPARKLE_ACCOUNT" \
-  --download-url-prefix "https://github.com/emilianscheel/remote-for-mac/releases/download/$RELEASE_VERSION/" \
+  --download-url-prefix "https://remote-for-mac.vercel.app/" \
   --maximum-versions 1 \
   --maximum-deltas 0 \
   -o "$APPCAST_STAGING/appcast.xml" \
@@ -192,4 +193,4 @@ spctl --assess --type open --context context:primary-signature --verbose=2 "$OUT
 
 echo "Created notarized release: $OUTPUT_DMG"
 echo "Updated signed appcast: $OUTPUT_APPCAST"
-echo "Upload the DMG to the GitHub release tagged '$RELEASE_VERSION'."
+echo "Commit the updated DMG and appcast, then deploy the web project."

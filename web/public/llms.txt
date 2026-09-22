@@ -5,12 +5,12 @@ Remote for Mac is a small native macOS menu bar app that turns an Apple USB-C Si
 ## Links
 
 - Website: https://remote-for-mac.vercel.app/
-- Latest download: https://github.com/emilianscheel/remote-for-mac/releases/latest/download/Remote.for.Mac.dmg
-- GitHub repository and releases: https://github.com/emilianscheel/remote-for-mac
+- Latest download: https://remote-for-mac.vercel.app/Remote.for.Mac.dmg
+- GitHub repository: https://github.com/emilianscheel/remote-for-mac
 
 ## Install
 
-1. Download `Remote for Mac.dmg` from the latest download link.
+1. Download `Remote.for.Mac.dmg` from the latest download link.
 2. Open the disk image and install Remote for Mac in Applications.
 3. Launch the app. It runs only in the menu bar and has no Dock window.
 4. Grant Device Control and Input Monitoring when requested. These permissions let the app receive remote input and send keyboard and media commands.
@@ -63,4 +63,4 @@ Remote for Mac checks its signed update feed automatically. Updates download sil
 
 ## Distribution
 
-The app is distributed directly as a signed and notarized DMG through GitHub Releases. It is not distributed through the Mac App Store because clickpad gesture support uses Apple’s private MultitouchSupport framework.
+The app is distributed directly as a signed and notarized DMG from the Remote for Mac website. The fixed download URL always serves the latest version. It is not distributed through the Mac App Store because clickpad gesture support uses Apple’s private MultitouchSupport framework.
