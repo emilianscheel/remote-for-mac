@@ -169,13 +169,7 @@ final class AppService: ObservableObject {
                 sounds.play(.slideNavigation)
                 return
             }
-            let context = applicationContext.currentContext()
-            let action = RemoteActionMap.action(for: input, in: context)
-            if context != .standard, case .arrow(.left) = action {
-                sounds.play(.slideNavigation)
-            } else if context != .standard, case .arrow(.right) = action {
-                sounds.play(.slideNavigation)
-            }
+            let action = RemoteActionMap.action(for: input, in: applicationContext.currentContext())
             actionDispatcher.dispatch(action)
         }
     }

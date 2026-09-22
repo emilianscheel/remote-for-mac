@@ -322,7 +322,7 @@ final class RemoteForMacTests: XCTestCase {
     }
 
     @MainActor
-    func testEveryPresentationNavigationInputPlaysFeedbackSound() {
+    func testLivePresentationNavigationDoesNotPlayFeedbackSound() {
         let input = RemoteInputMock()
         let sounds = SoundMock()
         let service = AppService(
@@ -339,7 +339,7 @@ final class RemoteForMacTests: XCTestCase {
 
         navigationInputs.forEach { input.onInput?($0) }
 
-        XCTAssertEqual(sounds.played, Array(repeating: .slideNavigation, count: navigationInputs.count))
+        XCTAssertTrue(sounds.played.isEmpty)
         _ = service
     }
 
