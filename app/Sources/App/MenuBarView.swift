@@ -20,11 +20,11 @@ struct MenuBarView: View {
 
             Divider()
 
-            bluetoothSettingsButton
-
             permissionButtons
 
-            Menu("Help", systemImage: "questionmark.circle") {
+            bluetoothSettingsButton
+
+            Menu("Help", systemImage: "questionmark") {
                 pairingInstructions
             }
             .labelStyle(.titleAndIcon)
