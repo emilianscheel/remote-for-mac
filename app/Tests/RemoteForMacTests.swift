@@ -63,6 +63,23 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(RemoteActionMap.action(for: .direction(.right), in: .powerPoint), .arrow(.right))
     }
 
+    func testVerticalPresentationNavigationMovesSlides() {
+        for context in [ApplicationContext.keynote, .powerPoint] {
+            XCTAssertEqual(RemoteActionMap.action(for: .direction(.up), in: context), .arrow(.right))
+            XCTAssertEqual(RemoteActionMap.action(for: .swipe(.up), in: context), .arrow(.right))
+            XCTAssertEqual(RemoteActionMap.action(for: .direction(.down), in: context), .arrow(.left))
+            XCTAssertEqual(RemoteActionMap.action(for: .swipe(.down), in: context), .arrow(.left))
+        }
+    }
+
+    func testRemoteFeedbackEdgesMatchSlideDirection() {
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .direction(.left)), .left)
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .direction(.down)), .left)
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .direction(.right)), .right)
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .direction(.up)), .right)
+        XCTAssertNil(RemoteFeedbackMap.edge(for: .playPause))
+    }
+
     func testPresentationShortcutKeyCodesAndModifiers() {
         let keynote = KeyboardShortcutResolver.event(
             for: KeyboardShortcut(key: .p, modifiers: [.command, .option])
@@ -189,15 +206,42 @@ final class RemoteForMacTests: XCTestCase {
     }
 
     @MainActor
+    func testMenuPresentationConsumesNavigationForVisualFeedback() {
+        let input = RemoteInputMock()
+        let dispatcher = ActionDispatcherMock()
+        let feedback = FeedbackMock()
+        let menuPresentation = MenuPresentationMonitorMock()
+        let service = AppService(
+            bluetooth: BluetoothMock(),
+            remoteInput: input,
+            actionDispatcher: dispatcher,
+            feedback: feedback,
+            menuPresentation: menuPresentation
+        )
+
+        menuPresentation.send(true)
+        input.onInput?(.direction(.up))
+        XCTAssertEqual(feedback.edges, [.right])
+        XCTAssertTrue(dispatcher.actions.isEmpty)
+
+        menuPresentation.send(false)
+        input.onInput?(.direction(.up))
+        XCTAssertEqual(dispatcher.actions, [.arrow(.up)])
+        _ = service
+    }
+
+    @MainActor
     func testAppServiceTracksPermissionRevocationAndStartsServicesOnce() {
         let permissions = PermissionMock(
             current: PermissionState(hasAccessibility: true, hasInputMonitoring: true)
         )
         let updater = UpdateMock()
+        let menuPresentation = MenuPresentationMonitorMock()
         let service = AppService(
             bluetooth: BluetoothMock(),
             remoteInput: RemoteInputMock(),
             actionDispatcher: ActionDispatcherMock(),
+            menuPresentation: menuPresentation,
             permissions: permissions,
             updater: updater
         )
@@ -211,6 +255,7 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(permissions.requestCount, 1)
         XCTAssertEqual(permissions.startMonitoringCount, 1)
         XCTAssertEqual(updater.startCount, 1)
+        XCTAssertEqual(menuPresentation.startCount, 1)
 
         permissions.send(PermissionState(hasAccessibility: false, hasInputMonitoring: true))
         XCTAssertFalse(service.hasDeviceControlPermission)
@@ -291,6 +336,22 @@ private final class ActionDispatcherMock: MacActionDispatching {
 private struct ApplicationContextMock: ApplicationContextProviding {
     let context: ApplicationContext
     func currentContext() -> ApplicationContext { context }
+}
+
+@MainActor
+private final class FeedbackMock: RemoteFeedbackDisplaying {
+    var edges: [RemoteFeedbackEdge] = []
+    func show(_ edge: RemoteFeedbackEdge) { edges.append(edge) }
+}
+
+@MainActor
+private final class MenuPresentationMonitorMock: MenuPresentationMonitoring {
+    var onChange: ((Bool) -> Void)?
+    var startCount = 0
+
+    func start() { startCount += 1 }
+    func stop() { onChange?(false) }
+    func send(_ isPresented: Bool) { onChange?(isPresented) }
 }
 
 @MainActor

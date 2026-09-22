@@ -27,6 +27,18 @@ protocol ApplicationContextProviding {
 }
 
 @MainActor
+protocol RemoteFeedbackDisplaying {
+    func show(_ edge: RemoteFeedbackEdge)
+}
+
+@MainActor
+protocol MenuPresentationMonitoring: AnyObject {
+    var onChange: ((Bool) -> Void)? { get set }
+    func start()
+    func stop()
+}
+
+@MainActor
 protocol PermissionServicing: AnyObject {
     var current: PermissionState { get }
     var onChange: ((PermissionState) -> Void)? { get set }

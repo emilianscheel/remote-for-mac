@@ -17,12 +17,15 @@ final class AppService: ObservableObject {
     private let remoteInput: RemoteInputServicing
     private let actionDispatcher: MacActionDispatching
     private let applicationContext: ApplicationContextProviding
+    private let feedback: RemoteFeedbackDisplaying
+    private let menuPresentation: MenuPresentationMonitoring
     private let permissions: PermissionServicing
     private let updater: UpdateServicing
     private var bluetoothRemotes: [NearbyRemote] = []
     private var hasSystemRemote = false
     private var selectedRemote: NearbyRemote?
     private var userDisconnected = false
+    private var isMenuPresented = false
     private var hasStarted = false
 
     init(
@@ -30,6 +33,8 @@ final class AppService: ObservableObject {
         remoteInput: RemoteInputServicing = RemoteInputService(),
         actionDispatcher: MacActionDispatching = MacActionDispatcher(),
         applicationContext: ApplicationContextProviding = ApplicationContextService(),
+        feedback: RemoteFeedbackDisplaying = RemoteFeedbackService(),
+        menuPresentation: MenuPresentationMonitoring = MenuPresentationMonitor(),
         permissions: PermissionServicing = PermissionsService(),
         updater: UpdateServicing = UpdateService()
     ) {
@@ -37,6 +42,8 @@ final class AppService: ObservableObject {
         self.remoteInput = remoteInput
         self.actionDispatcher = actionDispatcher
         self.applicationContext = applicationContext
+        self.feedback = feedback
+        self.menuPresentation = menuPresentation
         self.permissions = permissions
         self.updater = updater
         apply(permissions.current)
@@ -47,6 +54,7 @@ final class AppService: ObservableObject {
         guard !hasStarted else { return }
         hasStarted = true
         updater.start()
+        menuPresentation.start()
         permissions.requestRequiredPermissions()
         refreshPermissions()
         permissions.startMonitoring()
@@ -101,6 +109,7 @@ final class AppService: ObservableObject {
     }
 
     func quit() {
+        menuPresentation.stop()
         permissions.stopMonitoring()
         remoteInput.stop()
         bluetooth.stopScanning()
@@ -108,6 +117,9 @@ final class AppService: ObservableObject {
     }
 
     private func bindServices() {
+        menuPresentation.onChange = { [weak self] isPresented in
+            self?.isMenuPresented = isPresented
+        }
         permissions.onChange = { [weak self] state in
             self?.apply(state)
         }
@@ -149,6 +161,10 @@ final class AppService: ObservableObject {
         }
         remoteInput.onInput = { [weak self] input in
             guard let self else { return }
+            if isMenuPresented, let edge = RemoteFeedbackMap.edge(for: input) {
+                feedback.show(edge)
+                return
+            }
             let action = RemoteActionMap.action(for: input, in: applicationContext.currentContext())
             actionDispatcher.dispatch(action)
         }

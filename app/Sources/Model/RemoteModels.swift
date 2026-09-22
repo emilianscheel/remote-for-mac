@@ -85,6 +85,13 @@ enum MacAction: Equatable {
 }
 
 enum RemoteActionMap {
+    private static let presentationNavigationOverrides: [RemoteInput: MacAction] = [
+        .direction(.up): .arrow(.right),
+        .swipe(.up): .arrow(.right),
+        .direction(.down): .arrow(.left),
+        .swipe(.down): .arrow(.left),
+    ]
+
     private static let presentationOverrides: [ApplicationContext: [RemoteInput: MacAction]] = [
         .keynote: [
             .playPause: .keyboardShortcut(
@@ -101,6 +108,10 @@ enum RemoteActionMap {
     ]
 
     static func action(for input: RemoteInput, in context: ApplicationContext = .standard) -> MacAction {
+        if context != .standard, let action = presentationNavigationOverrides[input] {
+            return action
+        }
+
         if let action = presentationOverrides[context]?[input] {
             return action
         }
@@ -118,6 +129,21 @@ enum RemoteActionMap {
         case .power: .lockScreen
         case .circularClockwise: .media(.fastForward)
         case .circularCounterclockwise: .media(.rewind)
+        }
+    }
+}
+
+enum RemoteFeedbackEdge: Equatable {
+    case left
+    case right
+}
+
+enum RemoteFeedbackMap {
+    static func edge(for input: RemoteInput) -> RemoteFeedbackEdge? {
+        switch input {
+        case .direction(.left), .swipe(.left), .direction(.down), .swipe(.down): .left
+        case .direction(.right), .swipe(.right), .direction(.up), .swipe(.up): .right
+        default: nil
         }
     }
 }
