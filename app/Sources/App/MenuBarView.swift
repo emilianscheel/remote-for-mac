@@ -14,30 +14,6 @@ struct MenuBarView: View {
 
         Divider()
 
-        if service.connectionState.isConnected {
-            Button("Disconnect", systemImage: "xmark", action: service.disconnect)
-                .labelStyle(.titleAndIcon)
-        } else {
-            Button("Hold Back + Volume Up for 5 seconds.", systemImage: "info") {}
-                .labelStyle(.titleAndIcon)
-                .disabled(true)
-
-            if service.nearbyRemotes.isEmpty {
-                Button("Searching…", systemImage: "dot.radiowaves.left.and.right") {}
-                    .labelStyle(.titleAndIcon)
-                    .disabled(true)
-            } else {
-                ForEach(service.nearbyRemotes) { remote in
-                    Button(remote.name, systemImage: "appletvremote.gen4") {
-                        service.connect(to: remote)
-                    }
-                    .labelStyle(.titleAndIcon)
-                }
-            }
-        }
-
-        Divider()
-
         Button(action: service.openBluetoothSettings) {
             Label {
                 Text("Open Bluetooth Settings…")
@@ -50,6 +26,28 @@ struct MenuBarView: View {
             }
         }
         .labelStyle(.titleAndIcon)
+
+        if service.connectionState.isConnected {
+            Button("Disconnect", systemImage: "xmark", action: service.disconnect)
+                .labelStyle(.titleAndIcon)
+        } else {
+            Button("Hold 􀯷 Back and 􀁌 Volume Up for 5s") {}
+                .disabled(true)
+
+            Button("Connect to it via System Settings") {}
+                .disabled(true)
+
+            if !service.nearbyRemotes.isEmpty {
+                ForEach(service.nearbyRemotes) { remote in
+                    Button(remote.name, systemImage: "appletvremote.gen4") {
+                        service.connect(to: remote)
+                    }
+                    .labelStyle(.titleAndIcon)
+                }
+            }
+        }
+
+        Divider()
 
         if !service.hasDeviceControlPermission {
             Button(
