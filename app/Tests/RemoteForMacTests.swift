@@ -219,6 +219,56 @@ final class RemoteForMacTests: XCTestCase {
     }
 
     @MainActor
+    func testConnectionSoundsReflectReadinessWithoutDuplicates() {
+        let permissions = PermissionMock(
+            current: PermissionState(hasAccessibility: false, hasInputMonitoring: false)
+        )
+        let sounds = ConnectionSoundMock()
+        let bluetooth = BluetoothMock()
+        let input = RemoteInputMock()
+        let service = AppService(
+            bluetooth: bluetooth,
+            remoteInput: input,
+            actionDispatcher: ActionDispatcherMock(),
+            connectionSounds: sounds,
+            permissions: permissions
+        )
+        let remote = NearbyRemote(id: "remote", name: "Siri Remote", isPaired: true)
+
+        bluetooth.onConnected?(remote)
+        input.onConnectionChanged?(true)
+        XCTAssertEqual(sounds.played, [.connectedNeedsPermission])
+
+        permissions.send(PermissionState(hasAccessibility: true, hasInputMonitoring: true))
+        XCTAssertEqual(sounds.played, [.connectedNeedsPermission, .connectedReady])
+
+        service.disconnect()
+        service.disconnect()
+        XCTAssertEqual(sounds.played, [.connectedNeedsPermission, .connectedReady, .disconnected])
+    }
+
+    @MainActor
+    func testReadyRemoteUsesReadyConnectionSound() {
+        let permissions = PermissionMock(
+            current: PermissionState(hasAccessibility: true, hasInputMonitoring: true)
+        )
+        let sounds = ConnectionSoundMock()
+        let input = RemoteInputMock()
+        let service = AppService(
+            bluetooth: BluetoothMock(),
+            remoteInput: input,
+            actionDispatcher: ActionDispatcherMock(),
+            connectionSounds: sounds,
+            permissions: permissions
+        )
+
+        input.onConnectionChanged?(true)
+
+        XCTAssertEqual(sounds.played, [.connectedReady])
+        _ = service
+    }
+
+    @MainActor
     func testAppServiceUsesTheForegroundApplicationContext() {
         let input = RemoteInputMock()
         let dispatcher = ActionDispatcherMock()
@@ -320,7 +370,7 @@ final class RemoteForMacTests: XCTestCase {
 
     @MainActor
     func testReleaseVersionIsExposedToTheMenu() {
-        XCTAssertEqual(AppVersion.current, "1.3")
+        XCTAssertEqual(AppVersion.current, "1.4")
         XCTAssertEqual(
             Bundle.main.object(forInfoDictionaryKey: "SUScheduledCheckInterval") as? Double,
             86_400
@@ -364,6 +414,12 @@ private final class RemoteInputMock: RemoteInputServicing {
 private final class ActionDispatcherMock: MacActionDispatching {
     var actions: [MacAction] = []
     func dispatch(_ action: MacAction) { actions.append(action) }
+}
+
+@MainActor
+private final class ConnectionSoundMock: ConnectionSoundPlaying {
+    var played: [ConnectionSound] = []
+    func play(_ sound: ConnectionSound) { played.append(sound) }
 }
 
 private struct ApplicationContextMock: ApplicationContextProviding {

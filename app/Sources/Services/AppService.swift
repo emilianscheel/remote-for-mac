@@ -17,6 +17,7 @@ final class AppService: ObservableObject {
     private let remoteInput: RemoteInputServicing
     private let actionDispatcher: MacActionDispatching
     private let applicationContext: ApplicationContextProviding
+    private let connectionSounds: ConnectionSoundPlaying
     private let feedback: RemoteFeedbackDisplaying
     private let menuPresentation: MenuPresentationMonitoring
     private let permissions: PermissionServicing
@@ -33,6 +34,7 @@ final class AppService: ObservableObject {
         remoteInput: RemoteInputServicing = RemoteInputService(),
         actionDispatcher: MacActionDispatching = MacActionDispatcher(),
         applicationContext: ApplicationContextProviding = ApplicationContextService(),
+        connectionSounds: ConnectionSoundPlaying = SystemConnectionSoundService(),
         feedback: RemoteFeedbackDisplaying = RemoteFeedbackService(),
         menuPresentation: MenuPresentationMonitoring = MenuPresentationMonitor(),
         permissions: PermissionServicing = PermissionsService(),
@@ -42,6 +44,7 @@ final class AppService: ObservableObject {
         self.remoteInput = remoteInput
         self.actionDispatcher = actionDispatcher
         self.applicationContext = applicationContext
+        self.connectionSounds = connectionSounds
         self.feedback = feedback
         self.menuPresentation = menuPresentation
         self.permissions = permissions
@@ -68,18 +71,18 @@ final class AppService: ObservableObject {
 
     func beginScanning() {
         guard !connectionState.isConnected else { return }
-        connectionState = .scanning
+        transition(to: .scanning)
         bluetooth.startScanning()
     }
 
     func connect(to remote: NearbyRemote) {
         userDisconnected = false
         selectedRemote = remote
-        connectionState = .connecting(remote.name)
+        transition(to: .connecting(remote.name))
         remoteInput.start()
 
         if remote.id == Self.systemRemote.id {
-            connectionState = .connected(remote.name)
+            transition(to: .connected(remote.name))
             remoteInput.setEnabled(true)
         } else {
             bluetooth.connect(to: remote)
@@ -91,7 +94,7 @@ final class AppService: ObservableObject {
         remoteInput.setEnabled(false)
         bluetooth.disconnect()
         selectedRemote = nil
-        connectionState = .disconnected
+        transition(to: .disconnected)
         bluetooth.startScanning()
     }
 
@@ -127,18 +130,18 @@ final class AppService: ObservableObject {
             guard let self else { return }
             bluetoothRemotes = remotes
             publishNearbyRemotes()
-            if !connectionState.isConnected, selectedRemote == nil { connectionState = .scanning }
+            if !connectionState.isConnected, selectedRemote == nil { transition(to: .scanning) }
         }
         bluetooth.onConnected = { [weak self] remote in
             guard let self, !userDisconnected else { return }
             selectedRemote = remote
-            connectionState = .connected(remote.name)
+            transition(to: .connected(remote.name))
             remoteInput.start()
             remoteInput.setEnabled(true)
         }
         bluetooth.onFailure = { [weak self] message in
             guard let self, !userDisconnected, !connectionState.isConnected else { return }
-            connectionState = .failed(message)
+            transition(to: .failed(message))
         }
         remoteInput.onConnectionChanged = { [weak self] connected in
             guard let self else { return }
@@ -149,13 +152,13 @@ final class AppService: ObservableObject {
                 let remote = selectedRemote ?? Self.systemRemote
                 selectedRemote = remote
                 let name = remote.name
-                connectionState = .connected(name)
+                transition(to: .connected(name))
                 remoteInput.setEnabled(true)
             } else if !connected, connectionState.isConnected {
                 userDisconnected = true
                 remoteInput.stop()
                 selectedRemote = nil
-                connectionState = .disconnected
+                transition(to: .disconnected)
                 bluetooth.startScanning()
             }
         }
@@ -171,9 +174,26 @@ final class AppService: ObservableObject {
     }
 
     private func apply(_ permissions: PermissionState) {
+        let wasReady = isReady
         hasDeviceControlPermission = permissions.hasAccessibility
         hasInputMonitoringPermission = permissions.hasInputMonitoring
         hasRequiredPermissions = permissions.hasRequiredPermissions
+
+        if connectionState.isConnected, !wasReady, hasRequiredPermissions {
+            connectionSounds.play(.connectedReady)
+        }
+    }
+
+    private func transition(to newState: ConnectionState) {
+        let wasConnected = connectionState.isConnected
+        let isConnected = newState.isConnected
+        connectionState = newState
+
+        if !wasConnected, isConnected {
+            connectionSounds.play(hasRequiredPermissions ? .connectedReady : .connectedNeedsPermission)
+        } else if wasConnected, !isConnected {
+            connectionSounds.play(.disconnected)
+        }
     }
 
     private func publishNearbyRemotes() {

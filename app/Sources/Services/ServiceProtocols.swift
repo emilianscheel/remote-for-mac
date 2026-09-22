@@ -27,6 +27,11 @@ protocol ApplicationContextProviding {
 }
 
 @MainActor
+protocol ConnectionSoundPlaying {
+    func play(_ sound: ConnectionSound)
+}
+
+@MainActor
 protocol RemoteFeedbackDisplaying {
     func show(_ edge: RemoteFeedbackEdge)
 }
