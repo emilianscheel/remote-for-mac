@@ -11,7 +11,7 @@ readonly SPARKLE_ACCOUNT="${SPARKLE_ACCOUNT:-RemoteForMac}"
 readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 readonly PROJECT="$SCRIPT_DIR/RemoteForMac.xcodeproj"
-readonly OUTPUT_DMG="$PROJECT_ROOT/web/public/Remote.for.Mac.dmg"
+readonly OUTPUT_DMG="$PROJECT_ROOT/web/public/App.dmg"
 readonly OUTPUT_APPCAST="$PROJECT_ROOT/web/public/appcast.xml"
 readonly SPM_CACHE_DIR="${SPM_CACHE_DIR:-$HOME/Library/Caches/RemoteForMac/SourcePackages}"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/RemoteForMac-release.XXXXXX")"
@@ -174,7 +174,7 @@ xcrun stapler validate "$OUTPUT_DMG"
 
 echo "Generating signed Sparkle appcast for version $RELEASE_VERSION ($BUILD_VERSION)..."
 mkdir -p "$APPCAST_STAGING"
-cp "$OUTPUT_DMG" "$APPCAST_STAGING/Remote.for.Mac.dmg"
+cp "$OUTPUT_DMG" "$APPCAST_STAGING/App.dmg"
 "$GENERATE_APPCAST" \
   --account "$SPARKLE_ACCOUNT" \
   --download-url-prefix "https://remote-for-mac.vercel.app/" \
