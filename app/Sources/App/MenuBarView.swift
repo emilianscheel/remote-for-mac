@@ -30,9 +30,6 @@ struct MenuBarView: View {
             .labelStyle(.titleAndIcon)
         } else {
             if !service.nearbyRemotes.isEmpty {
-                Button("Connect to an available device") {}
-                    .disabled(true)
-
                 ForEach(service.nearbyRemotes) { remote in
                     Button(remote.name, systemImage: "appletvremote.gen4") {
                         service.connect(to: remote)
