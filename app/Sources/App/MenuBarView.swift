@@ -51,9 +51,18 @@ struct MenuBarView: View {
 
         if !service.hasDeviceControlPermission {
             Button(
-                "Open Device Control Settings…",
+                "Grant Device Control…",
                 systemImage: "hand.raised",
                 action: service.openDeviceControlSettings
+            )
+            .labelStyle(.titleAndIcon)
+        }
+
+        if !service.hasInputMonitoringPermission {
+            Button(
+                "Grant Input Monitoring…",
+                systemImage: "keyboard",
+                action: service.openInputMonitoringSettings
             )
             .labelStyle(.titleAndIcon)
         }
@@ -70,6 +79,6 @@ struct MenuBarView: View {
 
     private var statusText: String {
         let connection = service.connectionState.isConnected ? "Connected" : "Disconnected"
-        return service.hasDeviceControlPermission ? connection : "\(connection) · Permission required"
+        return service.hasRequiredPermissions ? connection : "\(connection) · Permission required"
     }
 }

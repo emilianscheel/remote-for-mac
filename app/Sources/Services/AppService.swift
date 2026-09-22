@@ -6,6 +6,7 @@ final class AppService: ObservableObject {
     @Published private(set) var connectionState: ConnectionState = .disconnected
     @Published private(set) var nearbyRemotes: [NearbyRemote] = []
     @Published private(set) var hasDeviceControlPermission = false
+    @Published private(set) var hasInputMonitoringPermission = false
     @Published private(set) var hasRequiredPermissions = false
 
     var isReady: Bool {
@@ -92,8 +93,11 @@ final class AppService: ObservableObject {
     }
 
     func openDeviceControlSettings() {
-        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent") else { return }
-        NSWorkspace.shared.open(url)
+        NSWorkspace.shared.open(Self.deviceControlSettingsURL)
+    }
+
+    func openInputMonitoringSettings() {
+        NSWorkspace.shared.open(Self.inputMonitoringSettingsURL)
     }
 
     func quit() {
@@ -151,7 +155,8 @@ final class AppService: ObservableObject {
     }
 
     private func apply(_ permissions: PermissionState) {
-        hasDeviceControlPermission = permissions.hasDeviceControl
+        hasDeviceControlPermission = permissions.hasAccessibility
+        hasInputMonitoringPermission = permissions.hasInputMonitoring
         hasRequiredPermissions = permissions.hasRequiredPermissions
     }
 
@@ -170,4 +175,11 @@ final class AppService: ObservableObject {
         name: "Apple TV Remote",
         isPaired: true
     )
+
+    static let deviceControlSettingsURL = URL(
+        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+    )!
+    static let inputMonitoringSettingsURL = URL(
+        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"
+    )!
 }

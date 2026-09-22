@@ -3,10 +3,10 @@ import IOKit.hid
 
 struct PermissionState: Equatable {
     let hasAccessibility: Bool
-    let hasDeviceControl: Bool
+    let hasInputMonitoring: Bool
 
     var hasRequiredPermissions: Bool {
-        hasAccessibility && hasDeviceControl
+        hasAccessibility && hasInputMonitoring
     }
 }
 
@@ -19,7 +19,7 @@ final class PermissionsService: PermissionServicing {
     var current: PermissionState {
         PermissionState(
             hasAccessibility: AXIsProcessTrusted(),
-            hasDeviceControl: IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+            hasInputMonitoring: IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
         )
     }
 

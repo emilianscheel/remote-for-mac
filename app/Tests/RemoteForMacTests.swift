@@ -191,7 +191,7 @@ final class RemoteForMacTests: XCTestCase {
     @MainActor
     func testAppServiceTracksPermissionRevocationAndStartsServicesOnce() {
         let permissions = PermissionMock(
-            current: PermissionState(hasAccessibility: true, hasDeviceControl: true)
+            current: PermissionState(hasAccessibility: true, hasInputMonitoring: true)
         )
         let updater = UpdateMock()
         let service = AppService(
@@ -203,6 +203,7 @@ final class RemoteForMacTests: XCTestCase {
         )
 
         XCTAssertTrue(service.hasDeviceControlPermission)
+        XCTAssertTrue(service.hasInputMonitoringPermission)
         XCTAssertTrue(service.hasRequiredPermissions)
 
         service.start()
@@ -211,13 +212,32 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(permissions.startMonitoringCount, 1)
         XCTAssertEqual(updater.startCount, 1)
 
-        permissions.send(PermissionState(hasAccessibility: true, hasDeviceControl: false))
+        permissions.send(PermissionState(hasAccessibility: false, hasInputMonitoring: true))
         XCTAssertFalse(service.hasDeviceControlPermission)
+        XCTAssertTrue(service.hasInputMonitoringPermission)
         XCTAssertFalse(service.hasRequiredPermissions)
 
-        permissions.send(PermissionState(hasAccessibility: true, hasDeviceControl: true))
+        permissions.send(PermissionState(hasAccessibility: true, hasInputMonitoring: false))
         XCTAssertTrue(service.hasDeviceControlPermission)
+        XCTAssertFalse(service.hasInputMonitoringPermission)
+        XCTAssertFalse(service.hasRequiredPermissions)
+
+        permissions.send(PermissionState(hasAccessibility: true, hasInputMonitoring: true))
+        XCTAssertTrue(service.hasDeviceControlPermission)
+        XCTAssertTrue(service.hasInputMonitoringPermission)
         XCTAssertTrue(service.hasRequiredPermissions)
+    }
+
+    @MainActor
+    func testPermissionSettingsDestinations() {
+        XCTAssertEqual(
+            AppService.deviceControlSettingsURL.absoluteString,
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+        )
+        XCTAssertEqual(
+            AppService.inputMonitoringSettingsURL.absoluteString,
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"
+        )
     }
 
     @MainActor
