@@ -17,6 +17,7 @@ export default function Home() {
             alt=""
             className="hidden size-full rounded-[1.65rem] dark:block"
             height={112}
+            loading="eager"
             src="/Icon-Dark.png"
             width={112}
           />
