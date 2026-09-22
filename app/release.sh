@@ -18,17 +18,30 @@ readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/RemoteForMac-release.XXXXXX")"
 readonly ARCHIVE="$WORK_DIR/RemoteForMac.xcarchive"
 readonly EXPORT_DIR="$WORK_DIR/export"
 readonly EXPORT_OPTIONS="$WORK_DIR/ExportOptions.plist"
-readonly STAGING="$WORK_DIR/dmg"
 readonly APPCAST_STAGING="$WORK_DIR/appcast"
 readonly UNSIGNED_DMG="$WORK_DIR/$APP_NAME.dmg"
 readonly NOTARY_RESULT="$WORK_DIR/notarization.json"
+readonly DMG_VOLUME_NAME="Remote for Mac"
+readonly DMG_WINDOW_WIDTH=700
+readonly DMG_WINDOW_HEIGHT=340
+readonly DMG_ICON_SIZE=128
+readonly DMG_APP_ICON_X=150
+readonly DMG_ICON_Y=170
+readonly DMG_APPLICATIONS_ICON_X=550
+readonly DMG_WRITABLE_IMAGE="$WORK_DIR/$APP_NAME-rw.dmg"
+readonly DMG_MOUNT_POINT="$WORK_DIR/$DMG_VOLUME_NAME"
+readonly DMG_BACKGROUND="$WORK_DIR/dmg-background.png"
+MOUNTED_DMG=0
 
 cleanup() {
+  if [[ "$MOUNTED_DMG" -eq 1 ]]; then
+    hdiutil detach "$DMG_MOUNT_POINT" -force >/dev/null 2>&1 || true
+  fi
   rm -rf "$WORK_DIR"
 }
 trap cleanup EXIT
 
-for command in xcodebuild codesign hdiutil xcrun ditto spctl; do
+for command in xcodebuild codesign hdiutil xcrun ditto osascript spctl swift; do
   if ! command -v "$command" >/dev/null; then
     echo "Missing required command: $command" >&2
     exit 1
@@ -135,15 +148,62 @@ if [[ -z "$APP_SIGNING_IDENTITY" ]]; then
 fi
 
 echo "Creating disk image..."
-mkdir -p "$STAGING"
-ditto "$APP" "$STAGING/$APP_NAME.app"
-ln -s /Applications "$STAGING/Applications"
 hdiutil create \
-  -volname "Remote for Mac" \
-  -srcfolder "$STAGING" \
-  -format UDZO \
+  -size 80m \
+  -fs HFS+ \
+  -volname "$DMG_VOLUME_NAME" \
   -ov \
-  "$UNSIGNED_DMG"
+  "$DMG_WRITABLE_IMAGE"
+mkdir -p "$DMG_MOUNT_POINT"
+hdiutil attach \
+  -readwrite \
+  -noverify \
+  -noautoopen \
+  -mountpoint "$DMG_MOUNT_POINT" \
+  "$DMG_WRITABLE_IMAGE"
+MOUNTED_DMG=1
+
+mkdir -p "$DMG_MOUNT_POINT/.background"
+ditto "$APP" "$DMG_MOUNT_POINT/$APP_NAME.app"
+ln -s /Applications "$DMG_MOUNT_POINT/Applications"
+swift "$SCRIPT_DIR/Scripts/RenderDMGBackground.swift" \
+  "$DMG_BACKGROUND" \
+  "$DMG_WINDOW_WIDTH" \
+  "$DMG_WINDOW_HEIGHT"
+ditto "$DMG_BACKGROUND" "$DMG_MOUNT_POINT/.background/background.png"
+
+osascript <<EOF
+tell application "Finder"
+  tell disk "$DMG_VOLUME_NAME"
+    open
+    set layoutWindow to container window
+    set current view of layoutWindow to icon view
+    set toolbar visible of layoutWindow to false
+    set statusbar visible of layoutWindow to false
+    set bounds of layoutWindow to {100, 100, $((100 + DMG_WINDOW_WIDTH)), $((100 + DMG_WINDOW_HEIGHT))}
+    set viewOptions to icon view options of layoutWindow
+    set arrangement of viewOptions to not arranged
+    set icon size of viewOptions to $DMG_ICON_SIZE
+    set text size of viewOptions to 10
+    set shows item info of viewOptions to false
+    set shows icon preview of viewOptions to true
+    set background picture of viewOptions to (POSIX file "$DMG_MOUNT_POINT/.background/background.png" as alias)
+    set position of item "$APP_NAME.app" to {$DMG_APP_ICON_X, $DMG_ICON_Y}
+    set position of item "Applications" to {$DMG_APPLICATIONS_ICON_X, $DMG_ICON_Y}
+    close layoutWindow
+  end tell
+end tell
+EOF
+
+sync
+hdiutil detach "$DMG_MOUNT_POINT"
+MOUNTED_DMG=0
+hdiutil convert \
+  "$DMG_WRITABLE_IMAGE" \
+  -format UDZO \
+  -imagekey zlib-level=9 \
+  -ov \
+  -o "$UNSIGNED_DMG"
 
 echo "Signing disk image..."
 codesign --force --timestamp --sign "$APP_SIGNING_IDENTITY" "$UNSIGNED_DMG"
