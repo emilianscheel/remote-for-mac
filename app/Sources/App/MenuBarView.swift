@@ -29,14 +29,8 @@ struct MenuBarView: View {
             }
             .labelStyle(.titleAndIcon)
         } else {
-            bluetoothSettingsButton
-
-            pairingInstructions
-
             if !service.nearbyRemotes.isEmpty {
-                Divider()
-
-                Button("Or connect to an existing device") {}
+                Button("Connect to an available device") {}
                     .disabled(true)
 
                 ForEach(service.nearbyRemotes) { remote in
@@ -45,7 +39,13 @@ struct MenuBarView: View {
                     }
                     .labelStyle(.titleAndIcon)
                 }
+
+                Divider()
             }
+
+            bluetoothSettingsButton
+
+            pairingInstructions
         }
 
         Divider()
