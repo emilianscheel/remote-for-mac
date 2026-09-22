@@ -34,6 +34,11 @@ struct MenuBarView: View {
             pairingInstructions
 
             if !service.nearbyRemotes.isEmpty {
+                Divider()
+
+                Button("Or connect to an existing device") {}
+                    .disabled(true)
+
                 ForEach(service.nearbyRemotes) { remote in
                     Button(remote.name, systemImage: "appletvremote.gen4") {
                         service.connect(to: remote)
