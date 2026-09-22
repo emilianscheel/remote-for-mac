@@ -30,10 +30,11 @@ guard arguments.count == 4,
 }
 
 let canvasSize = NSSize(width: width, height: height)
+let renderScale: CGFloat = 2
 guard let bitmap = NSBitmapImageRep(
     bitmapDataPlanes: nil,
-    pixelsWide: Int(width),
-    pixelsHigh: Int(height),
+    pixelsWide: Int(width * Double(renderScale)),
+    pixelsHigh: Int(height * Double(renderScale)),
     bitsPerSample: 8,
     samplesPerPixel: 4,
     hasAlpha: true,
@@ -44,14 +45,16 @@ guard let bitmap = NSBitmapImageRep(
 ), let graphicsContext = NSGraphicsContext(bitmapImageRep: bitmap) else {
     throw BackgroundRendererError.pngEncodingFailed
 }
+bitmap.size = canvasSize
 
 NSGraphicsContext.saveGraphicsState()
 NSGraphicsContext.current = graphicsContext
+graphicsContext.cgContext.scaleBy(x: renderScale, y: renderScale)
 
 NSColor(calibratedWhite: 0.975, alpha: 1).setFill()
 NSBezierPath(rect: NSRect(origin: .zero, size: canvasSize)).fill()
 
-let symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 54, weight: .medium)
+let symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 60, weight: .medium)
 guard let chevron = NSImage(
     systemSymbolName: "chevron.right",
     accessibilityDescription: "Drag to Applications"
