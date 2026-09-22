@@ -27,6 +27,12 @@
               "value" : {
                 "solid" : "display-p3:0.16303,0.16303,0.16303,1.00000"
               }
+            },
+            {
+              "appearance" : "tinted",
+              "value" : {
+                "solid" : "display-p3:0.27412,0.27727,0.27727,1.00000"
+              }
             }
           ],
           "glass" : true,
