@@ -1,0 +1,66 @@
+# Remote for Mac
+
+Remote for Mac is a small native macOS menu bar app that turns an Apple USB-C Siri Remote into a presentation and media controller. It supports the third-generation Siri Remote, model A2854, and is designed for macOS 27.
+
+## Links
+
+- Website: https://remote-for-mac.vercel.app/
+- Latest download: https://github.com/emilianscheel/remote-for-mac/releases/latest/download/Remote.for.Mac.dmg
+- GitHub repository and releases: https://github.com/emilianscheel/remote-for-mac
+
+## Install
+
+1. Download `Remote for Mac.dmg` from the latest download link.
+2. Open the disk image and install Remote for Mac in Applications.
+3. Launch the app. It runs only in the menu bar and has no Dock window.
+4. Grant Device Control and Input Monitoring when requested. These permissions let the app receive remote input and send keyboard and media commands.
+
+## Connect the remote
+
+1. Open the Remote for Mac menu and choose **Open Bluetooth Settings…**.
+2. Hold Back and Volume Up on the Siri Remote for five seconds.
+3. The remote may appear as **Bluetooth Device** in System Settings.
+4. Connect to it in **System Settings → Bluetooth**.
+5. If the remote does not appear, choose **Forget This Device** for it on nearby Macs, then repeat the pairing steps.
+6. Return to the menu and select the remote if a connection action is shown.
+
+The remote can be paired with one host at a time. Disconnecting inside Remote for Mac preserves its Mac pairing. To use it with an Apple TV again, pair it with that Apple TV using the normal Apple TV remote pairing process.
+
+## Presentation controls
+
+Remote for Mac detects Keynote and Microsoft PowerPoint in the foreground.
+
+- Left or Down: previous slide
+- Right or Up: next slide
+- Play/Pause in Keynote: start the presentation from the selected slide
+- Play/Pause in PowerPoint: start the presentation
+- Back: exit the presentation
+- Center: Return
+
+When the Remote for Mac menu is open, navigation presses display a fading edge indicator instead of controlling the menu. The indicator is useful for testing the remote connection.
+
+## System controls
+
+- Direction presses and clickpad swipes: arrow keys
+- Play/Pause: system play or pause
+- Volume Up and Volume Down: system volume
+- Mute: system mute
+- TV: Mission Control
+- Siri: open Siri on the Mac
+- Power: lock the Mac
+- Clockwise clickpad motion: fast-forward
+- Counterclockwise clickpad motion: rewind
+
+## Menu and permissions
+
+The menu shows the connection state, available remotes, Bluetooth settings, missing permission actions, help, the installed version, and Quit. A filled remote icon means the remote is connected and both required permissions are granted.
+
+Use **Grant Device Control…** for Accessibility permission and **Grant Input Monitoring…** for Input Monitoring permission. The app monitors both permissions and updates its status when either permission changes.
+
+## Updates
+
+Remote for Mac checks its signed update feed automatically. Updates download silently and install when the app quits. The update feed is https://remote-for-mac.vercel.app/appcast.xml.
+
+## Distribution
+
+The app is distributed directly as a signed and notarized DMG through GitHub Releases. It is not distributed through the Mac App Store because clickpad gesture support uses Apple’s private MultitouchSupport framework.
