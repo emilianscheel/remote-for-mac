@@ -11,7 +11,9 @@ final class BluetoothService: NSObject, BluetoothServicing {
     private lazy var central = CBCentralManager(delegate: self, queue: .main)
     private var peripherals: [UUID: CBPeripheral] = [:]
     private var names: [UUID: String] = [:]
-    private var selectedID: UUID?
+    private var connectedID: UUID?
+    private var requestedID: UUID?
+    private var reconnectAfterDisconnectID: UUID?
     private var wantsScanning = false
 
     func startScanning() {
@@ -33,12 +35,27 @@ final class BluetoothService: NSObject, BluetoothServicing {
         }
 
         stopScanning()
-        selectedID = id
-        central.connect(peripheral)
+        requestedID = id
+
+        switch peripheral.state {
+        case .connected:
+            finishConnecting(peripheral)
+        case .disconnected:
+            central.connect(peripheral)
+        case .connecting:
+            break
+        case .disconnecting:
+            reconnectAfterDisconnectID = id
+        @unknown default:
+            central.connect(peripheral)
+        }
     }
 
     func disconnect() {
-        guard let selectedID, let peripheral = peripherals[selectedID] else { return }
+        let id = connectedID ?? requestedID
+        requestedID = nil
+        reconnectAfterDisconnectID = nil
+        guard let id, let peripheral = peripherals[id] else { return }
         central.cancelPeripheralConnection(peripheral)
     }
 
@@ -106,6 +123,19 @@ final class BluetoothService: NSObject, BluetoothServicing {
         ids.insert(id)
         knownPeripheralIDs = ids
     }
+
+    private func finishConnecting(_ peripheral: CBPeripheral) {
+        let id = peripheral.identifier
+        connectedID = id
+        requestedID = nil
+        reconnectAfterDisconnectID = nil
+        saveAsKnown(id)
+
+        let name = names[id] ?? peripheral.name ?? "Siri Remote"
+        let remote = NearbyRemote(id: id.uuidString, name: name, isPaired: true)
+        publishRemotes()
+        onConnected?(remote)
+    }
 }
 
 extension BluetoothService: CBCentralManagerDelegate {
@@ -125,15 +155,16 @@ extension BluetoothService: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        saveAsKnown(peripheral.identifier)
-
-        let name = names[peripheral.identifier] ?? peripheral.name ?? "Siri Remote"
-        let remote = NearbyRemote(id: peripheral.identifier.uuidString, name: name, isPaired: true)
-        publishRemotes()
-        onConnected?(remote)
+        guard requestedID == peripheral.identifier else {
+            central.cancelPeripheralConnection(peripheral)
+            return
+        }
+        finishConnecting(peripheral)
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        guard requestedID == peripheral.identifier else { return }
+        requestedID = nil
         onFailure?("Could not connect to \(names[peripheral.identifier] ?? "Siri Remote")")
     }
 
@@ -142,8 +173,18 @@ extension BluetoothService: CBCentralManagerDelegate {
         didDisconnectPeripheral peripheral: CBPeripheral,
         error: Error?
     ) {
-        guard selectedID == peripheral.identifier else { return }
-        selectedID = nil
+        let id = peripheral.identifier
+        guard connectedID == id || requestedID == id || reconnectAfterDisconnectID == id else { return }
+        connectedID = nil
+
+        if reconnectAfterDisconnectID == id {
+            reconnectAfterDisconnectID = nil
+            requestedID = id
+            central.connect(peripheral)
+            return
+        }
+
+        beginScanWhenReady()
         if let error { onFailure?("Remote disconnected: \(error.localizedDescription)") }
     }
 }

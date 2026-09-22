@@ -157,6 +157,9 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(input.stopCount, 0)
         XCTAssertEqual(bluetooth.disconnectCount, 1)
         XCTAssertEqual(service.nearbyRemotes, [remote])
+
+        bluetooth.onFailure?("Cancelled")
+        XCTAssertEqual(service.connectionState, .disconnected)
     }
 
     @MainActor
@@ -183,6 +186,36 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(service.connectionState, .connected("Apple TV Remote"))
         XCTAssertEqual(input.enabledValues.last, true)
         XCTAssertTrue(bluetooth.connectedRemotes.isEmpty)
+    }
+
+    @MainActor
+    func testSystemConnectedRemoteWinsOverDuplicateBluetoothEntry() {
+        let bluetooth = BluetoothMock()
+        let input = RemoteInputMock()
+        let service = AppService(
+            bluetooth: bluetooth,
+            remoteInput: input,
+            actionDispatcher: ActionDispatcherMock()
+        )
+        let bluetoothEntry = NearbyRemote(
+            id: UUID().uuidString,
+            name: "Apple TV Remote",
+            isPaired: true
+        )
+
+        bluetooth.onRemotesChanged?([bluetoothEntry])
+        input.onConnectionChanged?(true)
+
+        let availableRemote = try! XCTUnwrap(service.nearbyRemotes.first)
+        XCTAssertEqual(service.nearbyRemotes.count, 1)
+        XCTAssertEqual(availableRemote.id, "system-connected-remote")
+
+        service.disconnect()
+        service.connect(to: availableRemote)
+
+        XCTAssertEqual(service.connectionState, .connected("Apple TV Remote"))
+        XCTAssertTrue(bluetooth.connectedRemotes.isEmpty)
+        XCTAssertEqual(Array(input.enabledValues.suffix(2)), [false, true])
     }
 
     @MainActor

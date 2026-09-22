@@ -137,7 +137,7 @@ final class AppService: ObservableObject {
             remoteInput.setEnabled(true)
         }
         bluetooth.onFailure = { [weak self] message in
-            guard let self, !connectionState.isConnected else { return }
+            guard let self, !userDisconnected, !connectionState.isConnected else { return }
             connectionState = .failed(message)
         }
         remoteInput.onConnectionChanged = { [weak self] connected in
@@ -178,7 +178,10 @@ final class AppService: ObservableObject {
 
     private func publishNearbyRemotes() {
         var remotes = bluetoothRemotes
-        if hasSystemRemote, !remotes.contains(where: { $0.name == Self.systemRemote.name }) {
+        if hasSystemRemote {
+            remotes.removeAll {
+                $0.name.compare(Self.systemRemote.name, options: .caseInsensitive) == .orderedSame
+            }
             remotes.append(Self.systemRemote)
         }
         nearbyRemotes = remotes.sorted {
