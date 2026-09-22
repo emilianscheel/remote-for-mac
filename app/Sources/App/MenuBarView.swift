@@ -81,10 +81,10 @@ struct MenuBarView: View {
         Button("Hold 􀯷 Back and 􀁌 Volume Up for 5s") {}
             .disabled(true)
 
-        Button("Connect to it via System Settings") {}
+        Button("Remote will appear as “Bluetooth Device”") {}
             .disabled(true)
 
-        Button("Remote will appear as “Bluetooth Device” in Settings") {}
+        Button("Connect to it via System Settings Bluetooth") {}
             .disabled(true)
 
         Button("Make sure to “Forget this device” on nearby Macs") {}
