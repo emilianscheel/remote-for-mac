@@ -17,7 +17,7 @@ final class AppService: ObservableObject {
     private let remoteInput: RemoteInputServicing
     private let actionDispatcher: MacActionDispatching
     private let applicationContext: ApplicationContextProviding
-    private let connectionSounds: ConnectionSoundPlaying
+    private let sounds: SoundPlaying
     private let feedback: RemoteFeedbackDisplaying
     private let menuPresentation: MenuPresentationMonitoring
     private let permissions: PermissionServicing
@@ -34,7 +34,7 @@ final class AppService: ObservableObject {
         remoteInput: RemoteInputServicing = RemoteInputService(),
         actionDispatcher: MacActionDispatching = MacActionDispatcher(),
         applicationContext: ApplicationContextProviding = ApplicationContextService(),
-        connectionSounds: ConnectionSoundPlaying = SystemConnectionSoundService(),
+        sounds: SoundPlaying = SystemSoundService(),
         feedback: RemoteFeedbackDisplaying = RemoteFeedbackService(),
         menuPresentation: MenuPresentationMonitoring = MenuPresentationMonitor(),
         permissions: PermissionServicing = PermissionsService(),
@@ -44,7 +44,7 @@ final class AppService: ObservableObject {
         self.remoteInput = remoteInput
         self.actionDispatcher = actionDispatcher
         self.applicationContext = applicationContext
-        self.connectionSounds = connectionSounds
+        self.sounds = sounds
         self.feedback = feedback
         self.menuPresentation = menuPresentation
         self.permissions = permissions
@@ -166,9 +166,16 @@ final class AppService: ObservableObject {
             guard let self else { return }
             if isMenuPresented, let edge = RemoteFeedbackMap.edge(for: input) {
                 feedback.show(edge)
+                sounds.play(.slideNavigation)
                 return
             }
-            let action = RemoteActionMap.action(for: input, in: applicationContext.currentContext())
+            let context = applicationContext.currentContext()
+            let action = RemoteActionMap.action(for: input, in: context)
+            if context != .standard, case .arrow(.left) = action {
+                sounds.play(.slideNavigation)
+            } else if context != .standard, case .arrow(.right) = action {
+                sounds.play(.slideNavigation)
+            }
             actionDispatcher.dispatch(action)
         }
     }
@@ -180,7 +187,7 @@ final class AppService: ObservableObject {
         hasRequiredPermissions = permissions.hasRequiredPermissions
 
         if connectionState.isConnected, !wasReady, hasRequiredPermissions {
-            connectionSounds.play(.connectedReady)
+            sounds.play(.connectedReady)
         }
     }
 
@@ -190,9 +197,9 @@ final class AppService: ObservableObject {
         connectionState = newState
 
         if !wasConnected, isConnected {
-            connectionSounds.play(hasRequiredPermissions ? .connectedReady : .connectedNeedsPermission)
+            sounds.play(hasRequiredPermissions ? .connectedReady : .connectedNeedsPermission)
         } else if wasConnected, !isConnected {
-            connectionSounds.play(.disconnected)
+            sounds.play(.disconnected)
         }
     }
 

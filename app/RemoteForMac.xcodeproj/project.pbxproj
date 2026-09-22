@@ -25,7 +25,7 @@
 		A00100000000000000000010 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000002 /* Sparkle */; };
 		A00100000000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000015 /* Assets.xcassets */; };
 		A00100000000000000000012 /* RemoteFeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000016 /* RemoteFeedbackService.swift */; };
-		A00100000000000000000013 /* ConnectionSoundService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000017 /* ConnectionSoundService.swift */; };
+		A00100000000000000000013 /* SoundService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000017 /* SoundService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,7 +61,7 @@
 		A00200000000000000000014 /* UpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateService.swift; sourceTree = "<group>"; };
 		A00200000000000000000015 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A00200000000000000000016 /* RemoteFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFeedbackService.swift; sourceTree = "<group>"; };
-		A00200000000000000000017 /* ConnectionSoundService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSoundService.swift; sourceTree = "<group>"; };
+		A00200000000000000000017 /* SoundService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,7 +145,7 @@
 				A00200000000000000000013 /* ApplicationContextService.swift */,
 				A00200000000000000000014 /* UpdateService.swift */,
 				A00200000000000000000016 /* RemoteFeedbackService.swift */,
-				A00200000000000000000017 /* ConnectionSoundService.swift */,
+				A00200000000000000000017 /* SoundService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -304,7 +304,7 @@
 				A0010000000000000000000E /* ApplicationContextService.swift in Sources */,
 				A0010000000000000000000F /* UpdateService.swift in Sources */,
 				A00100000000000000000012 /* RemoteFeedbackService.swift in Sources */,
-				A00100000000000000000013 /* ConnectionSoundService.swift in Sources */,
+				A00100000000000000000013 /* SoundService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -25,6 +25,12 @@ struct MenuBarView: View {
             bluetoothSettingsButton
 
             Menu("Help", systemImage: "questionmark") {
+                if service.isReady {
+                    controlInstructions
+
+                    Divider()
+                }
+
                 pairingInstructions
             }
             .labelStyle(.titleAndIcon)
@@ -76,6 +82,27 @@ struct MenuBarView: View {
             }
         }
         .labelStyle(.titleAndIcon)
+    }
+
+    @ViewBuilder
+    private var controlInstructions: some View {
+        Button("􀁶 or 􀁼 Next slide") {}
+            .disabled(true)
+
+        Button("􀁺 or 􀁸 Previous slide") {}
+            .disabled(true)
+
+        Button("􀊇 Start or stop slideshow") {}
+            .disabled(true)
+
+        Button("􀁲 Stop slideshow") {}
+            .disabled(true)
+
+        Button("􀁌 Volume up") {}
+            .disabled(true)
+
+        Button("􀁎 Volume down") {}
+            .disabled(true)
     }
 
     @ViewBuilder

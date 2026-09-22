@@ -4,15 +4,23 @@ export default function Home() {
   return (
     <main className="flex min-h-svh items-center justify-center px-6 py-16">
       <section aria-labelledby="product-name" className="flex w-full max-w-xs flex-col items-center text-center">
-        <Image
-          aria-hidden="true"
-          alt=""
-          className="mb-7 size-28 rounded-[1.65rem]"
-          height={112}
-          priority
-          src="/Icon.png"
-          width={112}
-        />
+        <div aria-hidden="true" className="mb-7 size-28">
+          <Image
+            alt=""
+            className="size-full rounded-[1.65rem] dark:hidden"
+            height={112}
+            priority
+            src="/Icon.png"
+            width={112}
+          />
+          <Image
+            alt=""
+            className="hidden size-full rounded-[1.65rem] dark:block"
+            height={112}
+            src="/Icon-Dark.png"
+            width={112}
+          />
+        </div>
         <h1 id="product-name" className="text-2xl font-medium tracking-[-0.035em] text-zinc-950 dark:text-zinc-50">
           Remote for Mac
         </h1>

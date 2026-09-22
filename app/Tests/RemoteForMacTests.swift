@@ -77,6 +77,10 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(RemoteFeedbackMap.edge(for: .direction(.down)), .left)
         XCTAssertEqual(RemoteFeedbackMap.edge(for: .direction(.right)), .right)
         XCTAssertEqual(RemoteFeedbackMap.edge(for: .direction(.up)), .right)
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .swipe(.left)), .left)
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .swipe(.down)), .left)
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .swipe(.right)), .right)
+        XCTAssertEqual(RemoteFeedbackMap.edge(for: .swipe(.up)), .right)
         XCTAssertNil(RemoteFeedbackMap.edge(for: .playPause))
     }
 
@@ -223,14 +227,14 @@ final class RemoteForMacTests: XCTestCase {
         let permissions = PermissionMock(
             current: PermissionState(hasAccessibility: false, hasInputMonitoring: false)
         )
-        let sounds = ConnectionSoundMock()
+        let sounds = SoundMock()
         let bluetooth = BluetoothMock()
         let input = RemoteInputMock()
         let service = AppService(
             bluetooth: bluetooth,
             remoteInput: input,
             actionDispatcher: ActionDispatcherMock(),
-            connectionSounds: sounds,
+            sounds: sounds,
             permissions: permissions
         )
         let remote = NearbyRemote(id: "remote", name: "Siri Remote", isPaired: true)
@@ -252,13 +256,13 @@ final class RemoteForMacTests: XCTestCase {
         let permissions = PermissionMock(
             current: PermissionState(hasAccessibility: true, hasInputMonitoring: true)
         )
-        let sounds = ConnectionSoundMock()
+        let sounds = SoundMock()
         let input = RemoteInputMock()
         let service = AppService(
             bluetooth: BluetoothMock(),
             remoteInput: input,
             actionDispatcher: ActionDispatcherMock(),
-            connectionSounds: sounds,
+            sounds: sounds,
             permissions: permissions
         )
 
@@ -293,23 +297,49 @@ final class RemoteForMacTests: XCTestCase {
         let input = RemoteInputMock()
         let dispatcher = ActionDispatcherMock()
         let feedback = FeedbackMock()
+        let sounds = SoundMock()
         let menuPresentation = MenuPresentationMonitorMock()
         let service = AppService(
             bluetooth: BluetoothMock(),
             remoteInput: input,
             actionDispatcher: dispatcher,
+            sounds: sounds,
             feedback: feedback,
             menuPresentation: menuPresentation
         )
 
         menuPresentation.send(true)
         input.onInput?(.direction(.up))
-        XCTAssertEqual(feedback.edges, [.right])
+        input.onInput?(.direction(.down))
+        XCTAssertEqual(feedback.edges, [.right, .left])
+        XCTAssertEqual(sounds.played, [.slideNavigation, .slideNavigation])
         XCTAssertTrue(dispatcher.actions.isEmpty)
 
         menuPresentation.send(false)
         input.onInput?(.direction(.up))
         XCTAssertEqual(dispatcher.actions, [.arrow(.up)])
+        _ = service
+    }
+
+    @MainActor
+    func testEveryPresentationNavigationInputPlaysFeedbackSound() {
+        let input = RemoteInputMock()
+        let sounds = SoundMock()
+        let service = AppService(
+            bluetooth: BluetoothMock(),
+            remoteInput: input,
+            actionDispatcher: ActionDispatcherMock(),
+            applicationContext: ApplicationContextMock(context: .keynote),
+            sounds: sounds
+        )
+        let navigationInputs: [RemoteInput] = [
+            .direction(.left), .direction(.right), .direction(.up), .direction(.down),
+            .swipe(.left), .swipe(.right), .swipe(.up), .swipe(.down),
+        ]
+
+        navigationInputs.forEach { input.onInput?($0) }
+
+        XCTAssertEqual(sounds.played, Array(repeating: .slideNavigation, count: navigationInputs.count))
         _ = service
     }
 
@@ -417,9 +447,9 @@ private final class ActionDispatcherMock: MacActionDispatching {
 }
 
 @MainActor
-private final class ConnectionSoundMock: ConnectionSoundPlaying {
-    var played: [ConnectionSound] = []
-    func play(_ sound: ConnectionSound) { played.append(sound) }
+private final class SoundMock: SoundPlaying {
+    var played: [AppSoundCue] = []
+    func play(_ cue: AppSoundCue) { played.append(cue) }
 }
 
 private struct ApplicationContextMock: ApplicationContextProviding {

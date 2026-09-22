@@ -27,8 +27,8 @@ protocol ApplicationContextProviding {
 }
 
 @MainActor
-protocol ConnectionSoundPlaying {
-    func play(_ sound: ConnectionSound)
+protocol SoundPlaying {
+    func play(_ cue: AppSoundCue)
 }
 
 @MainActor

@@ -50,17 +50,17 @@ final class RemoteFeedbackService: RemoteFeedbackDisplaying {
         }
 
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.12
+            context.duration = 0.36
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             panel.animator().alphaValue = 1
         }
 
         hideTask = Task { [weak self, weak panel] in
-            try? await Task.sleep(for: .milliseconds(240))
+            try? await Task.sleep(for: .milliseconds(720))
             guard !Task.isCancelled, let self, let panel else { return }
 
             NSAnimationContext.runAnimationGroup({ context in
-                context.duration = 0.32
+                context.duration = 0.96
                 context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 panel.animator().alphaValue = 0
             }, completionHandler: {
@@ -98,7 +98,7 @@ final class RemoteFeedbackService: RemoteFeedbackDisplaying {
     }
 
     private func frame(for edge: RemoteFeedbackEdge, on screen: NSScreen) -> NSRect {
-        let width = screen.frame.width * 0.2
+        let width = screen.frame.width * 0.4
         let x = edge == .left ? screen.frame.minX : screen.frame.maxX - width
         return NSRect(x: x, y: screen.frame.minY, width: width, height: screen.frame.height)
     }
