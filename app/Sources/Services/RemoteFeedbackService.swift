@@ -42,8 +42,7 @@ final class RemoteFeedbackService: RemoteFeedbackDisplaying {
         guard let screen else { return }
 
         panel.contentView = NSHostingView(rootView: RemoteFeedbackView(edge: edge))
-        let startEdge: RemoteFeedbackEdge = edge == .right ? .left : .right
-        panel.setFrame(frame(for: startEdge, on: screen), display: true)
+        panel.setFrame(frame(for: edge, on: screen), display: true)
 
         if !panel.isVisible {
             panel.alphaValue = 0
@@ -54,12 +53,6 @@ final class RemoteFeedbackService: RemoteFeedbackDisplaying {
             context.duration = 0.36
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             panel.animator().alphaValue = 1
-        }
-
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.28
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            panel.animator().setFrameOrigin(frame(for: edge, on: screen).origin)
         }
 
         hideTask = Task { [weak self, weak panel] in
