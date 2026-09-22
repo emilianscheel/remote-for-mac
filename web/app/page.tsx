@@ -27,6 +27,7 @@ export default function Home() {
         </h1>
         <a
           href="/App.dmg"
+          title="3.3 MB · App.dmg"
           className="mt-7 inline-flex items-center justify-center rounded-full bg-zinc-200 px-4 py-1.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-900 active:bg-zinc-400 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700 dark:focus-visible:outline-zinc-50 dark:active:bg-zinc-600"
         >
           Download
