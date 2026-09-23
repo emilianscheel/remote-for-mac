@@ -29,25 +29,33 @@ readonly DMG_CONTENT_VERTICAL_OFFSET=35
 readonly DMG_APP_ICON_X=150
 readonly DMG_ICON_Y=$((DMG_WINDOW_HEIGHT / 2 - DMG_CONTENT_VERTICAL_OFFSET))
 readonly DMG_APPLICATIONS_ICON_X=550
-readonly DMG_WRITABLE_IMAGE="$WORK_DIR/$APP_NAME-rw.dmg"
-readonly DMG_MOUNT_POINT="$WORK_DIR/$DMG_VOLUME_NAME"
 readonly DMG_BACKGROUND="$WORK_DIR/dmg-background.png"
-MOUNTED_DMG=0
+readonly DMG_STAGING_DIR="$WORK_DIR/dmg"
 
 cleanup() {
-  if [[ "$MOUNTED_DMG" -eq 1 ]]; then
-    hdiutil detach "$DMG_MOUNT_POINT" -force >/dev/null 2>&1 || true
-  fi
   rm -rf "$WORK_DIR"
 }
 trap cleanup EXIT
 
-for command in xcodebuild codesign hdiutil xcrun ditto osascript spctl swift; do
+if ! command -v create-dmg >/dev/null; then
+  echo "Missing create-dmg. Install it once with: brew install create-dmg" >&2
+  exit 1
+fi
+
+for command in xcodebuild codesign xcrun ditto spctl swift; do
   if ! command -v "$command" >/dev/null; then
     echo "Missing required command: $command" >&2
     exit 1
   fi
 done
+
+if mount | grep -F " on /Volumes/$DMG_VOLUME_NAME" >/dev/null; then
+  cat >&2 <<EOF
+Another '$DMG_VOLUME_NAME' disk image is mounted.
+Eject every mounted copy before running this release script so Finder configures the new image.
+EOF
+  exit 1
+fi
 
 echo "Checking notarization credentials in keychain profile '$NOTARY_PROFILE'..."
 if ! xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null; then
@@ -148,65 +156,31 @@ if [[ -z "$APP_SIGNING_IDENTITY" ]]; then
   exit 1
 fi
 
-echo "Creating disk image..."
-hdiutil create \
-  -size 80m \
-  -fs HFS+ \
-  -volname "$DMG_VOLUME_NAME" \
-  -ov \
-  "$DMG_WRITABLE_IMAGE"
-mkdir -p "$DMG_MOUNT_POINT"
-hdiutil attach \
-  -readwrite \
-  -noverify \
-  -noautoopen \
-  -mountpoint "$DMG_MOUNT_POINT" \
-  "$DMG_WRITABLE_IMAGE"
-MOUNTED_DMG=1
-
-mkdir -p "$DMG_MOUNT_POINT/.background"
-ditto "$APP" "$DMG_MOUNT_POINT/$APP_NAME.app"
-ln -s /Applications "$DMG_MOUNT_POINT/Applications"
+echo "Creating styled disk image..."
+mkdir -p "$DMG_STAGING_DIR"
+ditto "$APP" "$DMG_STAGING_DIR/$APP_NAME.app"
 swift "$SCRIPT_DIR/Scripts/RenderDMGBackground.swift" \
   "$DMG_BACKGROUND" \
   "$DMG_WINDOW_WIDTH" \
   "$DMG_WINDOW_HEIGHT" \
   "$DMG_CONTENT_VERTICAL_OFFSET"
-ditto "$DMG_BACKGROUND" "$DMG_MOUNT_POINT/.background/background.png"
-
-osascript <<EOF
-tell application "Finder"
-  tell disk "$DMG_VOLUME_NAME"
-    open
-    set layoutWindow to container window
-    set current view of layoutWindow to icon view
-    set toolbar visible of layoutWindow to false
-    set statusbar visible of layoutWindow to false
-    set bounds of layoutWindow to {100, 100, $((100 + DMG_WINDOW_WIDTH)), $((100 + DMG_WINDOW_HEIGHT))}
-    set viewOptions to icon view options of layoutWindow
-    set arrangement of viewOptions to not arranged
-    set icon size of viewOptions to $DMG_ICON_SIZE
-    set text size of viewOptions to 10
-    set shows item info of viewOptions to false
-    set shows icon preview of viewOptions to true
-    set background picture of viewOptions to (POSIX file "$DMG_MOUNT_POINT/.background/background.png" as alias)
-    set position of item "$APP_NAME.app" to {$DMG_APP_ICON_X, $DMG_ICON_Y}
-    set position of item "Applications" to {$DMG_APPLICATIONS_ICON_X, $DMG_ICON_Y}
-    close layoutWindow
-    delay 3
-  end tell
-end tell
-EOF
-
-sync
-hdiutil detach "$DMG_MOUNT_POINT"
-MOUNTED_DMG=0
-hdiutil convert \
-  "$DMG_WRITABLE_IMAGE" \
-  -format UDZO \
-  -imagekey zlib-level=9 \
-  -ov \
-  -o "$UNSIGNED_DMG"
+create-dmg \
+  --volname "$DMG_VOLUME_NAME" \
+  --background "$DMG_BACKGROUND" \
+  --window-pos 100 100 \
+  --window-size "$DMG_WINDOW_WIDTH" "$DMG_WINDOW_HEIGHT" \
+  --text-size 10 \
+  --icon-size "$DMG_ICON_SIZE" \
+  --icon "$APP_NAME.app" "$DMG_APP_ICON_X" "$DMG_ICON_Y" \
+  --hide-extension "$APP_NAME.app" \
+  --app-drop-link "$DMG_APPLICATIONS_ICON_X" "$DMG_ICON_Y" \
+  --filesystem HFS+ \
+  --format UDZO \
+  --hdiutil-retries 10 \
+  --applescript-sleep-duration 5 \
+  --overwrite \
+  "$UNSIGNED_DMG" \
+  "$DMG_STAGING_DIR"
 
 echo "Signing disk image..."
 codesign --force --timestamp --sign "$APP_SIGNING_IDENTITY" "$UNSIGNED_DMG"
