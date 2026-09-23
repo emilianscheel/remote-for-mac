@@ -25,8 +25,9 @@ readonly DMG_VOLUME_NAME="Remote for Mac"
 readonly DMG_WINDOW_WIDTH=700
 readonly DMG_WINDOW_HEIGHT=480
 readonly DMG_ICON_SIZE=128
+readonly DMG_CONTENT_VERTICAL_OFFSET=35
 readonly DMG_APP_ICON_X=150
-readonly DMG_ICON_Y=240
+readonly DMG_ICON_Y=$((DMG_WINDOW_HEIGHT / 2 - DMG_CONTENT_VERTICAL_OFFSET))
 readonly DMG_APPLICATIONS_ICON_X=550
 readonly DMG_WRITABLE_IMAGE="$WORK_DIR/$APP_NAME-rw.dmg"
 readonly DMG_MOUNT_POINT="$WORK_DIR/$DMG_VOLUME_NAME"
@@ -169,7 +170,8 @@ ln -s /Applications "$DMG_MOUNT_POINT/Applications"
 swift "$SCRIPT_DIR/Scripts/RenderDMGBackground.swift" \
   "$DMG_BACKGROUND" \
   "$DMG_WINDOW_WIDTH" \
-  "$DMG_WINDOW_HEIGHT"
+  "$DMG_WINDOW_HEIGHT" \
+  "$DMG_CONTENT_VERTICAL_OFFSET"
 ditto "$DMG_BACKGROUND" "$DMG_MOUNT_POINT/.background/background.png"
 
 osascript <<EOF
