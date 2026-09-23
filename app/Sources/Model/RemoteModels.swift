@@ -56,15 +56,20 @@ enum ApplicationContext: Hashable {
     case standard
     case keynote
     case powerPoint
+    case preview
+    case safari
+    case figma
 }
 
 enum KeyboardKey: Equatable {
+    case f
     case p
     case `return`
 }
 
 enum KeyboardModifier: Hashable {
     case command
+    case control
     case option
 }
 
@@ -85,7 +90,7 @@ enum MacAction: Equatable {
 }
 
 enum RemoteActionMap {
-    private static let presentationNavigationOverrides: [RemoteInput: MacAction] = [
+    private static let slideNavigation: [RemoteInput: MacAction] = [
         .direction(.up): .arrow(.right),
         .swipe(.up): .arrow(.right),
         .direction(.down): .arrow(.left),
@@ -105,10 +110,25 @@ enum RemoteActionMap {
             ),
             .back: .escape,
         ],
+        .preview: [
+            .playPause: .keyboardShortcut(
+                KeyboardShortcut(key: .f, modifiers: [.command, .control])
+            ),
+        ],
+        .safari: [
+            .playPause: .keyboardShortcut(
+                KeyboardShortcut(key: .f, modifiers: [.command, .control])
+            ),
+        ],
+        .figma: [
+            .playPause: .keyboardShortcut(
+                KeyboardShortcut(key: .return, modifiers: [.command, .option])
+            ),
+        ],
     ]
 
     static func action(for input: RemoteInput, in context: ApplicationContext = .standard) -> MacAction {
-        if context != .standard, let action = presentationNavigationOverrides[input] {
+        if let action = slideNavigation[input] {
             return action
         }
 

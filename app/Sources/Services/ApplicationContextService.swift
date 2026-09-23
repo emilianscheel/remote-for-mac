@@ -5,6 +5,9 @@ struct ApplicationContextService: ApplicationContextProviding {
         "com.apple.Keynote": .keynote,
         "com.apple.iWork.Keynote": .keynote,
         "com.microsoft.Powerpoint": .powerPoint,
+        "com.apple.Preview": .preview,
+        "com.apple.Safari": .safari,
+        "com.figma.Desktop": .figma,
     ]
 
     func currentContext() -> ApplicationContext {

@@ -101,6 +101,7 @@ enum KeyboardShortcutResolver {
 
     private static func keyCode(for key: KeyboardKey) -> CGKeyCode {
         switch key {
+        case .f: CGKeyCode(kVK_ANSI_F)
         case .p: CGKeyCode(kVK_ANSI_P)
         case .return: CGKeyCode(kVK_Return)
         }
@@ -110,6 +111,7 @@ enum KeyboardShortcutResolver {
         modifiers.reduce(into: CGEventFlags()) { flags, modifier in
             switch modifier {
             case .command: flags.insert(.maskCommand)
+            case .control: flags.insert(.maskControl)
             case .option: flags.insert(.maskAlternate)
             }
         }

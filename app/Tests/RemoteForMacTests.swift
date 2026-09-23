@@ -48,6 +48,9 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(ApplicationContextService.context(for: "com.apple.Keynote"), .keynote)
         XCTAssertEqual(ApplicationContextService.context(for: "com.apple.iWork.Keynote"), .keynote)
         XCTAssertEqual(ApplicationContextService.context(for: "com.microsoft.Powerpoint"), .powerPoint)
+        XCTAssertEqual(ApplicationContextService.context(for: "com.apple.Preview"), .preview)
+        XCTAssertEqual(ApplicationContextService.context(for: "com.apple.Safari"), .safari)
+        XCTAssertEqual(ApplicationContextService.context(for: "com.figma.Desktop"), .figma)
         XCTAssertEqual(ApplicationContextService.context(for: "com.apple.TextEdit"), .standard)
         XCTAssertEqual(ApplicationContextService.context(for: nil), .standard)
     }
@@ -63,8 +66,10 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(RemoteActionMap.action(for: .direction(.right), in: .powerPoint), .arrow(.right))
     }
 
-    func testVerticalPresentationNavigationMovesSlides() {
-        for context in [ApplicationContext.keynote, .powerPoint] {
+    func testVerticalNavigationMovesSlidesInEveryApplication() {
+        for context in [
+            ApplicationContext.standard, .keynote, .powerPoint, .preview, .safari, .figma,
+        ] {
             XCTAssertEqual(RemoteActionMap.action(for: .direction(.up), in: context), .arrow(.right))
             XCTAssertEqual(RemoteActionMap.action(for: .swipe(.up), in: context), .arrow(.right))
             XCTAssertEqual(RemoteActionMap.action(for: .direction(.down), in: context), .arrow(.left))
@@ -97,6 +102,34 @@ final class RemoteForMacTests: XCTestCase {
         )
         XCTAssertEqual(powerPoint.keyCode, CGKeyCode(kVK_Return))
         XCTAssertEqual(powerPoint.flags, [.maskCommand])
+
+        let nativeFullScreen = KeyboardShortcutResolver.event(
+            for: KeyboardShortcut(key: .f, modifiers: [.command, .control])
+        )
+        XCTAssertEqual(nativeFullScreen.keyCode, CGKeyCode(kVK_ANSI_F))
+        XCTAssertEqual(nativeFullScreen.flags, [.maskCommand, .maskControl])
+
+        let figmaPresentation = KeyboardShortcutResolver.event(
+            for: KeyboardShortcut(key: .return, modifiers: [.command, .option])
+        )
+        XCTAssertEqual(figmaPresentation.keyCode, CGKeyCode(kVK_Return))
+        XCTAssertEqual(figmaPresentation.flags, [.maskCommand, .maskAlternate])
+    }
+
+    func testAdditionalPresentationAppOverrides() {
+        let nativeFullScreen = MacAction.keyboardShortcut(
+            KeyboardShortcut(key: .f, modifiers: [.command, .control])
+        )
+        let figmaPresentation = MacAction.keyboardShortcut(
+            KeyboardShortcut(key: .return, modifiers: [.command, .option])
+        )
+
+        XCTAssertEqual(RemoteActionMap.action(for: .playPause, in: .preview), nativeFullScreen)
+        XCTAssertEqual(RemoteActionMap.action(for: .playPause, in: .safari), nativeFullScreen)
+        XCTAssertEqual(RemoteActionMap.action(for: .playPause, in: .figma), figmaPresentation)
+        XCTAssertEqual(RemoteActionMap.action(for: .back, in: .preview), .escape)
+        XCTAssertEqual(RemoteActionMap.action(for: .back, in: .safari), .escape)
+        XCTAssertEqual(RemoteActionMap.action(for: .back, in: .figma), .escape)
     }
 
     func testHIDUsages() {
@@ -131,7 +164,8 @@ final class RemoteForMacTests: XCTestCase {
         let service = AppService(
             bluetooth: bluetooth,
             remoteInput: input,
-            actionDispatcher: dispatcher
+            actionDispatcher: dispatcher,
+            applicationContext: ApplicationContextMock(context: .standard)
         )
         let remote = NearbyRemote(id: "remote", name: "Siri Remote", isPaired: true)
 
@@ -317,7 +351,7 @@ final class RemoteForMacTests: XCTestCase {
 
         menuPresentation.send(false)
         input.onInput?(.direction(.up))
-        XCTAssertEqual(dispatcher.actions, [.arrow(.up)])
+        XCTAssertEqual(dispatcher.actions, [.arrow(.right)])
         _ = service
     }
 
