@@ -193,6 +193,7 @@ tell application "Finder"
     set position of item "$APP_NAME.app" to {$DMG_APP_ICON_X, $DMG_ICON_Y}
     set position of item "Applications" to {$DMG_APPLICATIONS_ICON_X, $DMG_ICON_Y}
     close layoutWindow
+    delay 3
   end tell
 end tell
 EOF
