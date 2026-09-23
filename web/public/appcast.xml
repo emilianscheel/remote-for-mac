@@ -4,11 +4,11 @@
         <title>Remote for Mac</title>
         <item>
             <title>1.4</title>
-            <pubDate>Wed, 23 Sep 2026 08:58:25 +0200</pubDate>
+            <pubDate>Wed, 23 Sep 2026 10:00:18 +0200</pubDate>
             <sparkle:version>4</sparkle:version>
             <sparkle:shortVersionString>1.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>27.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://remote-for-mac.vercel.app/App.dmg" length="2749342" type="application/octet-stream" sparkle:edSignature="q2s7DGJuXylUiXth82gdOygNqohyKGbTtTfYm5lOdgHFdQH5yYgqm8k0+v3eKY3X8b7MbMvRmDIXIJARJqQhAg=="/>
+            <enclosure url="https://remote-for-mac.vercel.app/App.dmg" length="2748805" type="application/octet-stream" sparkle:edSignature="ePabhdFMfGfFNTLwxi3NfJKtFPJiOIzFDqNZ0T4Y6PoaqhBGfTKEk0p3joXMW1WhSALWsL6Uo/yDyIQkQI1IBg=="/>
         </item>
     </channel>
 </rss>
