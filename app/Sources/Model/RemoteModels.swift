@@ -5,20 +5,19 @@ enum ConnectionState: Equatable {
     case scanning
     case connecting(String)
     case connected(String)
+    case forgetting(String)
     case failed(String)
 
     var statusText: String {
-        switch self {
-        case .disconnected: "Not connected"
-        case .scanning: "Searching…"
-        case .connecting(let name): "Connecting to \(name)…"
-        case .connected(let name): "Connected to \(name)"
-        case .failed(let message): message
-        }
+        isConnected ? "Connected" : "Disconnected"
     }
 
     var isConnected: Bool {
         if case .connected = self { true } else { false }
+    }
+
+    var isForgetting: Bool {
+        if case .forgetting = self { true } else { false }
     }
 }
 
@@ -177,10 +176,35 @@ struct RemoteMatcher {
     }
 
     static func isDiscoverableRemote(name: String?) -> Bool {
-        guard let name = name?.lowercased() else { return false }
-        return name.contains("siriremote")
-            || name.contains("siri remote")
-            || name.contains("apple tv remote")
+        guard let name else { return false }
+        let lowercaseName = name.lowercased()
+        return lowercaseName.contains("siriremote")
+            || lowercaseName.contains("siri remote")
+            || lowercaseName.contains("apple tv remote")
+            || lowercaseName == "bluetooth device"
+            || isLikelyAppleSerial(name)
+    }
+
+    static func isPotentialInquiryRemote(name: String?) -> Bool {
+        guard let name, !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return true
+        }
+        return isDiscoverableRemote(name: name)
+    }
+
+    static func isLikelyAppleSerial(_ name: String) -> Bool {
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard name.count == 12,
+              name == name.uppercased(),
+              name.unicodeScalars.allSatisfy({
+                  CharacterSet.uppercaseLetters.contains($0)
+                      || CharacterSet.decimalDigits.contains($0)
+              }),
+              name.unicodeScalars.contains(where: CharacterSet.uppercaseLetters.contains),
+              name.unicodeScalars.contains(where: CharacterSet.decimalDigits.contains) else {
+            return false
+        }
+        return true
     }
 }
 

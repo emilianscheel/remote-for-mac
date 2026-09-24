@@ -1,8 +1,10 @@
 import Foundation
 import IOKit
 import IOKit.hid
+import OSLog
 
 final class RemoteInputService: RemoteInputServicing {
+    private static let logger = Logger(subsystem: "com.local.RemoteForMac", category: "RemoteInput")
     var onInput: ((RemoteInput) -> Void)?
     var onConnectionChanged: ((Bool) -> Void)?
 
@@ -11,6 +13,12 @@ final class RemoteInputService: RemoteInputServicing {
     private var buttonEdges = ButtonEdgeDeduplicator<RemoteInput>()
     private var enabled = false
     private let touchService = TouchService()
+
+    var connectedRemoteAddress: String? {
+        devices.lazy.compactMap {
+            IOHIDDeviceGetProperty($0, kIOHIDSerialNumberKey as CFString) as? String
+        }.first
+    }
 
     init() {
         touchService.onInput = { [weak self] input in self?.emit(input) }
@@ -60,11 +68,13 @@ final class RemoteInputService: RemoteInputServicing {
     fileprivate func deviceAdded(_ device: IOHIDDevice) {
         guard isA2854(device), !devices.contains(where: { CFEqual($0, device) }) else { return }
         devices.append(device)
+        Self.logger.info("A2854 HID added address=\(self.address(of: device) ?? "<missing>", privacy: .public)")
         if enabled { openDevice(device) }
         onConnectionChanged?(true)
     }
 
     fileprivate func deviceRemoved(_ device: IOHIDDevice) {
+        Self.logger.info("A2854 HID removed address=\(self.address(of: device) ?? "<missing>", privacy: .public)")
         devices.removeAll { CFEqual($0, device) }
         buttonEdges.reset()
         if devices.isEmpty { onConnectionChanged?(false) }
@@ -105,6 +115,10 @@ final class RemoteInputService: RemoteInputServicing {
         let vendor = IOHIDDeviceGetProperty(device, kIOHIDVendorIDKey as CFString) as? Int ?? -1
         let product = IOHIDDeviceGetProperty(device, kIOHIDProductIDKey as CFString) as? Int ?? -1
         return RemoteMatcher.isA2854(vendorID: vendor, productID: product)
+    }
+
+    private func address(of device: IOHIDDevice) -> String? {
+        IOHIDDeviceGetProperty(device, kIOHIDSerialNumberKey as CFString) as? String
     }
 
     private func openDevice(_ device: IOHIDDevice) {

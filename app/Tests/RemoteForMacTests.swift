@@ -14,7 +14,15 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "Siri Remote"))
         XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "siriremote"))
         XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "Apple TV Remote"))
+        XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "Bluetooth Device"))
+        XCTAssertTrue(RemoteMatcher.isDiscoverableRemote(name: "DJ7Q73KS2330"))
         XCTAssertFalse(RemoteMatcher.isDiscoverableRemote(name: "Magic Keyboard"))
+        XCTAssertFalse(RemoteMatcher.isDiscoverableRemote(name: "FM35"))
+        XCTAssertFalse(RemoteMatcher.isDiscoverableRemote(name: "abcdefghijkl"))
+        XCTAssertTrue(RemoteMatcher.isPotentialInquiryRemote(name: nil))
+        XCTAssertTrue(RemoteMatcher.isPotentialInquiryRemote(name: ""))
+        XCTAssertTrue(RemoteMatcher.isPotentialInquiryRemote(name: "Bluetooth Device"))
+        XCTAssertFalse(RemoteMatcher.isPotentialInquiryRemote(name: "Magic Keyboard"))
     }
 
     func testEveryInputHasTheExpectedAction() {
@@ -140,10 +148,12 @@ final class RemoteForMacTests: XCTestCase {
     }
 
     func testConnectionStatusText() {
-        XCTAssertEqual(ConnectionState.disconnected.statusText, "Not connected")
-        XCTAssertEqual(ConnectionState.scanning.statusText, "Searching…")
-        XCTAssertEqual(ConnectionState.connecting("Living Room").statusText, "Connecting to Living Room…")
-        XCTAssertEqual(ConnectionState.connected("Living Room").statusText, "Connected to Living Room")
+        XCTAssertEqual(ConnectionState.disconnected.statusText, "Disconnected")
+        XCTAssertEqual(ConnectionState.scanning.statusText, "Disconnected")
+        XCTAssertEqual(ConnectionState.connecting("Living Room").statusText, "Disconnected")
+        XCTAssertEqual(ConnectionState.connected("Living Room").statusText, "Connected")
+        XCTAssertEqual(ConnectionState.forgetting("Living Room").statusText, "Disconnected")
+        XCTAssertEqual(ConnectionState.failed("Failure").statusText, "Disconnected")
     }
 
     func testMirroredHIDEdgesAreDeduplicated() {
@@ -180,7 +190,9 @@ final class RemoteForMacTests: XCTestCase {
         service.connect(to: remote)
         XCTAssertEqual(service.connectionState, .connecting("Siri Remote"))
         XCTAssertEqual(input.startCount, 1)
-        bluetooth.onConnected?(remote)
+        bluetooth.onPairingCompleted?(remote)
+        XCTAssertEqual(service.connectionState, .connecting("Siri Remote"))
+        input.onConnectionChanged?(true)
         XCTAssertEqual(service.connectionState, .connected("Siri Remote"))
         XCTAssertTrue(service.connectionState.isConnected)
         XCTAssertEqual(input.enabledValues.last, true)
@@ -189,19 +201,24 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(dispatcher.actions, [.media(.playPause)])
 
         service.disconnect()
-        XCTAssertEqual(service.connectionState, .disconnected)
+        XCTAssertEqual(service.connectionState, .forgetting("Siri Remote"))
         XCTAssertFalse(service.connectionState.isConnected)
         XCTAssertEqual(input.enabledValues.last, false)
         XCTAssertEqual(input.stopCount, 0)
-        XCTAssertEqual(bluetooth.disconnectCount, 1)
-        XCTAssertEqual(service.nearbyRemotes, [remote])
+        XCTAssertEqual(bluetooth.forgetCount, 1)
+        XCTAssertEqual(bluetooth.forgottenAddresses, [input.connectedRemoteAddress])
+        XCTAssertEqual(service.nearbyRemotes.map(\.name), ["Apple TV Remote"])
 
-        bluetooth.onFailure?("Cancelled")
+        bluetooth.onForgetCompleted?()
+        XCTAssertEqual(service.connectionState, .forgetting("Siri Remote"))
+        input.onConnectionChanged?(false)
         XCTAssertEqual(service.connectionState, .disconnected)
+        XCTAssertTrue(service.nearbyRemotes.isEmpty)
+        XCTAssertEqual(bluetooth.startScanningCount, 2)
     }
 
     @MainActor
-    func testSystemConnectedRemoteRemainsAvailableForReconnect() {
+    func testDisconnectForgetsSystemConnectedRemote() {
         let bluetooth = BluetoothMock()
         let input = RemoteInputMock()
         let service = AppService(
@@ -215,15 +232,53 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(service.nearbyRemotes.map(\.name), ["Apple TV Remote"])
 
         service.disconnect()
-        XCTAssertEqual(service.connectionState, .disconnected)
+        XCTAssertEqual(service.connectionState, .forgetting("Apple TV Remote"))
         XCTAssertEqual(service.nearbyRemotes.map(\.name), ["Apple TV Remote"])
         XCTAssertEqual(input.enabledValues.last, false)
+        XCTAssertEqual(bluetooth.forgottenAddresses, [input.connectedRemoteAddress])
 
-        let remote = try! XCTUnwrap(service.nearbyRemotes.first)
-        service.connect(to: remote)
-        XCTAssertEqual(service.connectionState, .connected("Apple TV Remote"))
-        XCTAssertEqual(input.enabledValues.last, true)
-        XCTAssertTrue(bluetooth.connectedRemotes.isEmpty)
+        input.onConnectionChanged?(false)
+        XCTAssertEqual(service.connectionState, .forgetting("Apple TV Remote"))
+        bluetooth.onForgetCompleted?()
+        XCTAssertEqual(service.connectionState, .disconnected)
+        XCTAssertTrue(service.nearbyRemotes.isEmpty)
+        XCTAssertEqual(bluetooth.forgetCount, 1)
+    }
+
+    @MainActor
+    func testExternalHIDRemovalDoesNotStopManagerInsideRemovalCallback() {
+        let input = RemoteInputMock()
+        let service = AppService(
+            bluetooth: BluetoothMock(),
+            remoteInput: input,
+            actionDispatcher: ActionDispatcherMock()
+        )
+
+        input.onConnectionChanged?(true)
+        input.onConnectionChanged?(false)
+
+        XCTAssertEqual(service.connectionState, .disconnected)
+        XCTAssertEqual(input.stopCount, 0)
+        XCTAssertEqual(input.enabledValues.last, false)
+    }
+
+    @MainActor
+    func testForgetFailureDoesNotPretendTheRemoteWasDisconnected() {
+        let bluetooth = BluetoothMock()
+        let input = RemoteInputMock()
+        let service = AppService(
+            bluetooth: bluetooth,
+            remoteInput: input,
+            actionDispatcher: ActionDispatcherMock()
+        )
+
+        input.onConnectionChanged?(true)
+        service.disconnect()
+        bluetooth.onFailure?("Could not forget the Apple TV Remote")
+
+        XCTAssertEqual(service.connectionState, .failed("Could not forget the Apple TV Remote"))
+        XCTAssertEqual(service.nearbyRemotes.map(\.name), ["Apple TV Remote"])
+        XCTAssertEqual(bluetooth.forgetCount, 1)
     }
 
     @MainActor
@@ -249,11 +304,12 @@ final class RemoteForMacTests: XCTestCase {
         XCTAssertEqual(availableRemote.id, "system-connected-remote")
 
         service.disconnect()
-        service.connect(to: availableRemote)
+        bluetooth.onForgetCompleted?()
+        input.onConnectionChanged?(false)
 
-        XCTAssertEqual(service.connectionState, .connected("Apple TV Remote"))
-        XCTAssertTrue(bluetooth.connectedRemotes.isEmpty)
-        XCTAssertEqual(Array(input.enabledValues.suffix(2)), [false, true])
+        XCTAssertEqual(service.connectionState, .disconnected)
+        XCTAssertTrue(service.nearbyRemotes.isEmpty)
+        XCTAssertEqual(input.enabledValues.last, false)
     }
 
     @MainActor
@@ -273,7 +329,7 @@ final class RemoteForMacTests: XCTestCase {
         )
         let remote = NearbyRemote(id: "remote", name: "Siri Remote", isPaired: true)
 
-        bluetooth.onConnected?(remote)
+        bluetooth.onPairingCompleted?(remote)
         input.onConnectionChanged?(true)
         XCTAssertEqual(sounds.played, [.connectedNeedsPermission])
 
@@ -282,6 +338,9 @@ final class RemoteForMacTests: XCTestCase {
 
         service.disconnect()
         service.disconnect()
+        XCTAssertEqual(sounds.played, [.connectedNeedsPermission, .connectedReady])
+        bluetooth.onForgetCompleted?()
+        input.onConnectionChanged?(false)
         XCTAssertEqual(sounds.played, [.connectedNeedsPermission, .connectedReady, .disconnected])
     }
 
@@ -448,16 +507,21 @@ final class RemoteForMacTests: XCTestCase {
 
 private final class BluetoothMock: BluetoothServicing {
     var onRemotesChanged: (([NearbyRemote]) -> Void)?
-    var onConnected: ((NearbyRemote) -> Void)?
+    var onPairingCompleted: ((NearbyRemote) -> Void)?
+    var onForgetCompleted: (() -> Void)?
     var onFailure: ((String) -> Void)?
     var startScanningCount = 0
-    var disconnectCount = 0
+    var forgetCount = 0
+    var forgottenAddresses: [String?] = []
     var connectedRemotes: [NearbyRemote] = []
 
     func startScanning() { startScanningCount += 1 }
     func stopScanning() {}
     func connect(to remote: NearbyRemote) { connectedRemotes.append(remote) }
-    func disconnect() { disconnectCount += 1 }
+    func forget(address: String?) {
+        forgetCount += 1
+        forgottenAddresses.append(address)
+    }
 }
 
 private final class RemoteInputMock: RemoteInputServicing {
@@ -466,6 +530,7 @@ private final class RemoteInputMock: RemoteInputServicing {
     var enabledValues: [Bool] = []
     var startCount = 0
     var stopCount = 0
+    var connectedRemoteAddress: String? = "e0:c3:ea:8b:1b:05"
 
     func start() { startCount += 1 }
     func stop() {

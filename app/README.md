@@ -2,7 +2,7 @@
 
 A small macOS 27 menu bar app that uses a USB-C Siri Remote (3rd generation, A2854) to control presentations and common Mac actions.
 
-Open `RemoteForMac.xcodeproj`, select the `RemoteForMac` scheme, and run it. The app requests Accessibility and Input Monitoring access on first launch. For the first connection, put the remote in pairing mode by holding **Back + Volume Up** for five seconds, then pair `siriremote` in **System Settings → Bluetooth**. macOS exposes its controls to the app after the system pairing completes.
+Open `RemoteForMac.xcodeproj`, select the `RemoteForMac` scheme, and run it. The app requests Bluetooth, Accessibility, and Input Monitoring access on first launch. Put the remote in pairing mode by holding **Back + Volume Up** for five seconds, then select `siriremote` or `Bluetooth Device` in the menu bar app. Choosing **Disconnect** disconnects and forgets the remote, so it must be paired again before the next connection.
 
 Keep the selected development team and the `com.local.RemoteForMac` bundle identifier unchanged. macOS associates Device Control and Data Access grants with that signed identity, so subsequent launches and rebuilds do not ask again.
 

@@ -107,14 +107,6 @@
 			path = Sources;
 			sourceTree = "<group>";
 		};
-		A0400000000000000000000A /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				A00200000000000000000015 /* Assets.xcassets */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
 		A04000000000000000000003 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -183,6 +175,14 @@
 				A00200000000000000000011 /* RemoteForMacTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A0400000000000000000000A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000015 /* Assets.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -353,11 +353,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 4;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 9GALM9GLFA;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -390,10 +390,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 9GALM9GLFA;
 				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Support/Info.plist;

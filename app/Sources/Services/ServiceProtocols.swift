@@ -1,18 +1,21 @@
 import Foundation
 
+@MainActor
 protocol BluetoothServicing: AnyObject {
     var onRemotesChanged: (([NearbyRemote]) -> Void)? { get set }
-    var onConnected: ((NearbyRemote) -> Void)? { get set }
+    var onPairingCompleted: ((NearbyRemote) -> Void)? { get set }
+    var onForgetCompleted: (() -> Void)? { get set }
     var onFailure: ((String) -> Void)? { get set }
     func startScanning()
     func stopScanning()
     func connect(to remote: NearbyRemote)
-    func disconnect()
+    func forget(address: String?)
 }
 
 protocol RemoteInputServicing: AnyObject {
     var onInput: ((RemoteInput) -> Void)? { get set }
     var onConnectionChanged: ((Bool) -> Void)? { get set }
+    var connectedRemoteAddress: String? { get }
     func start()
     func setEnabled(_ enabled: Bool)
     func stop()

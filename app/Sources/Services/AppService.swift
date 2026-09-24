@@ -26,6 +26,8 @@ final class AppService: ObservableObject {
     private var hasSystemRemote = false
     private var selectedRemote: NearbyRemote?
     private var userDisconnected = false
+    private var systemForgetCompleted = false
+    private var forgetCompletionTask: Task<Void, Never>?
     private var isMenuPresented = false
     private var hasStarted = false
 
@@ -90,12 +92,21 @@ final class AppService: ObservableObject {
     }
 
     func disconnect() {
+        guard connectionState.isConnected, !connectionState.isForgetting else { return }
         userDisconnected = true
+        systemForgetCompleted = false
+        let name = selectedRemote?.name ?? Self.systemRemote.name
+        transition(to: .forgetting(name))
         remoteInput.setEnabled(false)
-        bluetooth.disconnect()
-        selectedRemote = nil
-        transition(to: .disconnected)
-        bluetooth.startScanning()
+        forgetCompletionTask?.cancel()
+        forgetCompletionTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(12))
+            guard !Task.isCancelled, let self, connectionState.isForgetting else { return }
+            systemForgetCompleted = false
+            userDisconnected = false
+            transition(to: .failed("Could not forget the Apple TV Remote"))
+        }
+        bluetooth.forget(address: remoteInput.connectedRemoteAddress)
     }
 
     func openBluetoothSettings() {
@@ -116,6 +127,7 @@ final class AppService: ObservableObject {
         permissions.stopMonitoring()
         remoteInput.stop()
         bluetooth.stopScanning()
+        forgetCompletionTask?.cancel()
         NSApplication.shared.terminate(nil)
     }
 
@@ -132,15 +144,30 @@ final class AppService: ObservableObject {
             publishNearbyRemotes()
             if !connectionState.isConnected, selectedRemote == nil { transition(to: .scanning) }
         }
-        bluetooth.onConnected = { [weak self] remote in
+        bluetooth.onPairingCompleted = { [weak self] remote in
             guard let self, !userDisconnected else { return }
             selectedRemote = remote
-            transition(to: .connected(remote.name))
-            remoteInput.start()
-            remoteInput.setEnabled(true)
+            if hasSystemRemote {
+                transition(to: .connected(remote.name))
+                remoteInput.start()
+                remoteInput.setEnabled(true)
+            }
+        }
+        bluetooth.onForgetCompleted = { [weak self] in
+            guard let self, connectionState.isForgetting else { return }
+            systemForgetCompleted = true
+            completeForgetIfReady()
         }
         bluetooth.onFailure = { [weak self] message in
-            guard let self, !userDisconnected, !connectionState.isConnected else { return }
+            guard let self else { return }
+            if connectionState.isForgetting {
+                forgetCompletionTask?.cancel()
+                systemForgetCompleted = false
+                userDisconnected = false
+                transition(to: .failed(message))
+                return
+            }
+            guard !userDisconnected, !connectionState.isConnected else { return }
             transition(to: .failed(message))
         }
         remoteInput.onConnectionChanged = { [weak self] connected in
@@ -154,9 +181,11 @@ final class AppService: ObservableObject {
                 let name = remote.name
                 transition(to: .connected(name))
                 remoteInput.setEnabled(true)
+            } else if !connected, connectionState.isForgetting {
+                completeForgetIfReady()
             } else if !connected, connectionState.isConnected {
                 userDisconnected = true
-                remoteInput.stop()
+                remoteInput.setEnabled(false)
                 selectedRemote = nil
                 transition(to: .disconnected)
                 bluetooth.startScanning()
@@ -186,23 +215,35 @@ final class AppService: ObservableObject {
     }
 
     private func transition(to newState: ConnectionState) {
+        let oldState = connectionState
         let wasConnected = connectionState.isConnected
         let isConnected = newState.isConnected
         connectionState = newState
 
         if !wasConnected, isConnected {
             sounds.play(hasRequiredPermissions ? .connectedReady : .connectedNeedsPermission)
-        } else if wasConnected, !isConnected {
+        } else if wasConnected, !isConnected, !newState.isForgetting {
+            sounds.play(.disconnected)
+        } else if oldState.isForgetting, newState == .disconnected {
             sounds.play(.disconnected)
         }
+    }
+
+    private func completeForgetIfReady() {
+        guard connectionState.isForgetting, systemForgetCompleted, !hasSystemRemote else { return }
+        selectedRemote = nil
+        forgetCompletionTask?.cancel()
+        forgetCompletionTask = nil
+        bluetoothRemotes.removeAll { $0.isPaired }
+        publishNearbyRemotes()
+        transition(to: .disconnected)
+        bluetooth.startScanning()
     }
 
     private func publishNearbyRemotes() {
         var remotes = bluetoothRemotes
         if hasSystemRemote {
-            remotes.removeAll {
-                $0.name.compare(Self.systemRemote.name, options: .caseInsensitive) == .orderedSame
-            }
+            remotes.removeAll { $0.isPaired }
             remotes.append(Self.systemRemote)
         }
         nearbyRemotes = remotes.sorted {

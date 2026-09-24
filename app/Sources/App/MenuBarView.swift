@@ -14,15 +14,17 @@ struct MenuBarView: View {
 
         Divider()
 
-        if service.connectionState.isConnected {
+        if service.connectionState.isForgetting {
+            Button("Forgetting Apple TV Remote…", systemImage: "hourglass") {}
+                .labelStyle(.titleAndIcon)
+                .disabled(true)
+        } else if service.connectionState.isConnected {
             Button("Disconnect", systemImage: "xmark", action: service.disconnect)
                 .labelStyle(.titleAndIcon)
 
             Divider()
 
             permissionButtons
-
-            bluetoothSettingsButton
 
             Menu("Help", systemImage: "questionmark") {
                 if service.isReady {
@@ -46,14 +48,16 @@ struct MenuBarView: View {
                 Divider()
             }
 
-            bluetoothSettingsButton
+            if isFailed {
+                bluetoothSettingsButton
+            }
 
             pairingInstructions
         }
 
         Divider()
 
-        if !service.connectionState.isConnected {
+        if !service.connectionState.isConnected, !service.connectionState.isForgetting {
             permissionButtons
 
             if !service.hasRequiredPermissions {
@@ -113,7 +117,7 @@ struct MenuBarView: View {
         Button("Remote will appear as “Bluetooth Device”") {}
             .disabled(true)
 
-        Button("Connect to it via System Settings Bluetooth") {}
+        Button("Select it here to pair") {}
             .disabled(true)
 
         Button("Make sure to “Forget this device” on nearby Macs") {}
@@ -142,12 +146,16 @@ struct MenuBarView: View {
     }
 
     private var statusText: String {
-        let connection = service.connectionState.isConnected ? "Connected" : "Disconnected"
-        return service.hasRequiredPermissions ? connection : "\(connection) · Permission required"
+        service.connectionState.statusText
     }
 
     private var statusIcon: String {
+        if service.connectionState.isForgetting { return "hourglass" }
         guard service.connectionState.isConnected else { return "xmark" }
         return service.hasRequiredPermissions ? "checkmark" : "exclamationmark.triangle"
+    }
+
+    private var isFailed: Bool {
+        if case .failed = service.connectionState { true } else { false }
     }
 }
